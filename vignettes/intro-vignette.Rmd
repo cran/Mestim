@@ -1,0 +1,434 @@
+---
+title: "An Introduction to `Mestim`"
+subtitle: "Applied M-estimation and computation of the empirical sandwich variance."
+author:
+- name: François Grolleau
+  affiliation: Clincal epidemiology — Hôpital Hôtel-Dieu
+date: "December 17, 2022"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to geex}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This vignette serves as a short introduction to computing the variance-covariance matrix of a multidimensional parameter using M-estimation and the empirical sandwich variance. You may want to check the latest version of this vignette on [GitHub](https://fcgrolleau.github.io/Mestim/vignette/vignette.html).
+
+## Baby review of M-estimation
+Denoting $F$ a probability distribution, a $p$-dimensional M-estimator of $\psi$-type $T$ solves the vector equation
+$$\int_\mathcal{Z}\psi\big(z, T(F)\big)dF(z)=\boldsymbol{0}.$$
+In practice, this means that the estimator $T$ has an *unbiased estimating function* $\psi(z,\theta)=\{\psi_1(z,\theta),  \ldots, \psi_p(z,\theta)\}^T$ with solution $\hat{\theta}~(p\times 1)$ solving in $\theta$ the $(p\times 1)$ set of “stacked” estimating equations given by $$ \sum_{i=1}^{n}\psi(Z_i,\theta)=\boldsymbol{0}.$$
+For a $\psi$-type M-estimator $T$ with estimate $\hat{\theta}$, under suitable regularity conditions for $\psi$, the central limit theorem and Slutsky's theorem yield
+$$\sqrt{n}\big(\hat{\theta}-T(F)\big)\xrightarrow{\mathcal{D}}\mathcal{N}\big(0, \Sigma)$$
+where $$\Sigma=\Bigg[\mathbb{E}\bigg\{\frac{\partial \psi\big(Z,T(F)\big) }{\partial\theta^T}\bigg\}\Bigg]^{-1}\mathbb{E}\Big\{ \psi\big(Z,T(F)\big) \psi^T\big(Z,T(F)\big)\Big\}\Bigg[\mathbb{E}\bigg\{\frac{\partial \psi\big(Z,T(F)\big) }{\partial\theta^T}\bigg\}\Bigg]^{-T}.$$
+This implies that the $p$-dimensional M-estimator $\hat{\theta}$ is an asymptotically normal, $\sqrt{n}$-consistent, estimator for $T(F)$.
+See [Boos and Stefanski (2013)](http://ndl.ethernet.edu.et/bitstream/123456789/61932/1/265.pdf) for a full introduction to M-estimation.
+
+## What `Mestim` does
+Provided with observed data $(Z_i)_{1≤i≤n}$, a $p$-dimensional vector of estimates $\hat{\theta}$ and a $(p\times 1)$ *unbiased estimating function* $\psi$, the `Mestim` package computes the sandwich formula
+$$\hat{\Sigma}=\Bigg[n^{-1}\sum_{i=1}^n\bigg\{\frac{\partial \psi\big(Z_i,\hat{\theta}\big) }{\partial\theta^T}\bigg\}\Bigg]^{-1}
+n^{-1}\sum_{i=1}^n\Big\{ \psi\big(Z_i,\hat{\theta}\big) \psi^T\big(Z_i,\hat{\theta}\big)\Big\}
+\Bigg[n^{-1}\sum_{i=1}^n\bigg\{\frac{\partial \psi\big(Z_i,\hat{\theta}\big) }{\partial\theta^T}\bigg\}\Bigg]^{-T}.$$
+The estimated asymptotic variance-covariance matrix of $\hat{\theta}$ is $n^{-1} \hat{\Sigma}$, and so, we have
+$$\hat{\theta} \mathrel{\dot\sim} \mathcal{N}\big(0, n^{-1} \hat{\Sigma}).$$
+Under the hood, `Mestim` algorithmically computes the Jacobian matrix of $\psi$; derivatives and outer products in $\hat{\Sigma}$ are then computed in parallel. To compute the asymptotic variance-covariance matrix, the analyst thus only need to provide a list detailing the “stacked” estimating functions in $\psi$. Below, we give examples of growing complexity to illustrate how `Mestim` can leverage the flexibility of M-estimation theory to calculate asymptotic standard errors (and confidence intervals) for parameter estimates $\hat{\theta}$.
+
+## Example 1: Prediction task via logistic regression 
+Let's try to compute the asymptotic standard errors of estimated parameters in a logistic regression model. This simple example serves to get familiar with `Mestim` commands.
+
+Let's generate synthetic data with two predictors and a binary outcome such that $Z=(X_1,X_2,Y)^T$.
+<details>
+<summary>*click here to see the data generating process.*</summary>
+<br>
+Here we use
+$$X_1 \sim \mathcal{N}(0,1)$$
+$$X_2 \sim \mathcal{N}(0,3)$$
+$$Y|X \sim \mathcal{B}\Big(\text{expit}(\beta_1^{0}X_1+\beta_2^{0}X_2)\Big)$$
+with $\beta_1^{0}=4$, $\beta_2^{0}=6$.
+
+NB: We use superscript $^{0}$ to denote true values of the parameters.
+```{r, message=FALSE, warning=FALSE}
+gen_lr_dat <- function(n, seed=123)
+{
+set.seed(seed)
+X_1 <- rnorm(n, sd = 1); X_2 <- rnorm(n, sd = 3) # generate x_1 and x_2
+true_betas <- c(4,5) # generate true parameters
+X <- model.matrix(~-1+X_1+X_2) # build the design matrix
+Y <- rbinom(n, 1, 1/(1 + exp(-X %*% true_betas)) ) # generate Y from X and true_betas
+dat  <-  data.frame(X_1=X_1, X_2=X_2, Y=Y) # build a simulated dataset
+return(dat)
+}
+```
+</details>
+<br>
+```{r, message=FALSE, warning=FALSE}
+dat <- gen_lr_dat(5000)
+head(dat)
+```
+
+Let's fit a logistic regression model and put the estimated parameters in a list.
+```{r, message=FALSE, warning=FALSE, results='hide'}
+mod <- glm(Y~-1 + X_1 + X_2, data=dat, family = "binomial")
+thetas_hat <- list(thetas_1=coef(mod)[1], thetas_2=coef(mod)[2])
+```
+
+Recall that the estimated parameters $\hat{\theta}=(\hat{\theta}_1, \hat{\theta}_2)^T$ from this logistic regression model jointly solve $$\sum_{i=1}^{n}\bigg(\Big[1+\exp\big\{-{(\theta_1X_{1,i}+\theta_2X_{2,i})\big\}\Big]^{-1}}-Y_i\bigg)X_{1,i}
+=0$$
+and
+$$\sum_{i=1}^{n}\bigg(\Big[1+\exp\big\{-{(\theta_1X_{1,i}+\theta_2X_{2,i})\big\}\Big]^{-1}}-Y_i\bigg)X_{2,i}
+=0.$$ Therefore, we can identify
+$$\psi_1(Z_i,\theta_1)=\bigg(\Big[1+\exp\big\{-{(\theta_1X_{1,i}+\theta_2X_{2,i})\big\}\Big]^{-1}}-Y_i\bigg)X_{1,i}$$
+and
+$$\psi_2(Z_i,\theta_1)=\bigg(\Big[1+\exp\big\{-{(\theta_1X_{1,i}+\theta_2X_{2,i})\big\}\Big]^{-1}}-Y_i\bigg)X_{2,i}.$$
+With that in mind, let's build a list for the unbiased estimating function $\psi(z,\theta)=\Big(\psi_1(z,\theta_1), \psi_2(z,\theta_2)\Big)^T$.
+```{r, message=FALSE, warning=FALSE, results='hide'}
+psi_1 <- expression( ((1/(1+exp(-(thetas_1 * X_1 + thetas_2 * X_2)))) - Y) * X_1 )
+psi_2 <- expression( ((1/(1+exp(-(thetas_1 * X_1 + thetas_2 * X_2)))) - Y) * X_2 )
+psi <- list(psi_1, psi_2)
+```
+NB: parameters' names (here `thetas_1` and `thetas_2`) must be consistent with the previous list.
+
+We are finally ready to pass these arguments to the `get_vcov` function form the `Mestim` package.
+```{r, message=FALSE, warning=FALSE, results='hide'}
+library(Mestim)
+res <- get_vcov(data=dat, thetas=thetas_hat, M=psi)
+```
+
+You can obtain the variance-covariance matrix from a `get_vcov` result as follows
+```{r, message=FALSE, warning=FALSE}
+res$vcov
+```
+<details>
+<summary>*click here to verify that the variance-covariance matrix from `get_vcov` is similar to that of `glm`.*</summary>
+<br>
+```{r, message=FALSE, warning=FALSE}
+vcov(mod)
+```
+This is indeed very close the results in`res$vcov`.
+</details>
+<br>
+Asymptotic standard errors are square root of the diagonal elements from the estimated variance-covariance matrix. These are stored in the `se` attribute.
+```{r, message=FALSE, warning=FALSE}
+res$se
+```
+
+## Example 2: Average treatment effect via outcome regression
+Let's generate synthetic observational data with treatment allocation $A$, continuous outcome $Y$ and a single confounder $X$ such that $Z=(X,A,Y)^T$.
+
+<details>
+<summary>*click here to see the data generating process.*</summary>
+<br>
+Here we use
+$$X \sim \mathcal{N}(0,1)$$
+$$A|X \sim \mathcal{B}\Big(\text{expit}(2X)\Big)$$
+$$\epsilon \sim \mathcal{N}(0,20)$$
+$$Y|X,\epsilon = \gamma_1^{0} X + \gamma_2^{0} A + \gamma_3^{0} AX + \epsilon$$
+with $\gamma_1^{0}=4$, $\gamma_2^{0}=3$, and $\gamma_3^{0}=2$.
+
+NB: We use superscript $^{0}$ to denote true values of the parameters.
+```{r, message=FALSE, warning=FALSE}
+gen_obs_dat <- function(n, seed=123)
+{
+set.seed(seed)
+X <- rnorm(n) # generate X
+A <- rbinom(n, 1, 1/(1 + exp(- 2 * X)) )  # generate treatment allocation A
+X_mat <- model.matrix(~ -1 + X + A + A:X) # build the design matrix
+true_gammas <- c(4,3,2) 
+epsi <- rnorm(n,0,20) # generate gaussian noise 
+Y <- (X_mat %*% true_gammas) + epsi # generate observed outcomes 
+dat  <-  data.frame(X=X, A=A, Y=Y) # build a simulated dataset
+return(dat)
+}
+```
+</details>
+<br>
+```{r, message=FALSE, warning=FALSE}
+dat <- gen_obs_dat(5000)
+head(dat)
+```
+In this example, the goal is to calculate standard errors for the outcome regression average causal effect estimator
+$$\hat{\delta}=n^{-1}\sum_{i=1}^n\mathbb{\hat{E}}(Y|X=X_i, A=1)-\mathbb{\hat{E}}(Y|X=X_i, A=0).$$
+
+For $\mathbb{E}(Y|X, A)$, let's specify the regression model $m(X, A;\boldsymbol{\gamma})=\gamma_1X + \gamma_2A + \gamma_3AX$ and store the estimated parameters.
+```{r, message=FALSE, warning=FALSE, results='hide'}
+m <- lm(Y~ -1 + X + A + A:X, data = dat)
+gamma_1_hat <- coef(m)[1]
+gamma_2_hat <- coef(m)[2]
+gamma_3_hat <- coef(m)[3]
+```
+Recall that the estimated parameters $\hat{\boldsymbol{\gamma}}=(\hat{\gamma}_1,\hat{\gamma}_2,\hat{\gamma}_3)^T$ from this linear regression model jointly solve
+$$\sum_{i=1}^n (Y_i-\gamma_1X_i - \gamma_2A_i - \gamma_3A_iX_i)X_i=0,$$
+$$\sum_{i=1}^n (Y_i-\gamma_1X_i - \gamma_2A_i - \gamma_3A_iX_i)A_i=0,$$
+$$\sum_{i=1}^n (Y_i-\gamma_1X_i - \gamma_2A_i - \gamma_3A_iX_i)A_iX_i=0.$$
+Disregarding the summation sign, we can straightforwardly identify the three first elements of the estimating function $\psi(z,\theta)$.
+Before building a list detailing the function $\psi$, we need to identify the estimating function of our main parameter of interest $\delta.$
+To do so, recall that we can estimate $\delta$ as 
+$$\hat{\delta}=n^{-1}\sum_{i=1}^nm(X_i,1;\hat{\boldsymbol{\gamma}})-m(X_i,0;\hat{\boldsymbol{\gamma}}) \\
+=n^{-1}\sum_{i=1}^n\{\hat{\gamma}_1+ \hat{\gamma}_2 \times 1 +\hat{\gamma}_3 \times 1 \times X_i\} - 
+\{\hat{\gamma}_1+ \hat{\gamma}_2 \times 0 +\hat{\gamma}_3 \times 0 \times X_i\} \\
+=n^{-1}\sum_{i=1}^n \hat{\gamma}_2 +\hat{\gamma}_3 X_i.
+$$
+Let's first compute it.
+```{r, message=FALSE, warning=FALSE, results='hide'}
+delta_hat <- mean(gamma_2_hat + gamma_3_hat*dat$X)
+```
+
+Note that rearranging the last equality we have
+$$\sum_{i=1}^n \hat{\gamma}_2 +\hat{\gamma}_3 X_i - \hat{\delta} = 0$$
+which straightforwardly yields the last element of the estimating function $\psi(z,\theta)$.
+Disregarding the summation sign yields the last estimating function which we can now “stack” with the previous ones. Let's now build a list detailing the full function $\psi(z,\theta)$.
+
+```{r, message=FALSE, warning=FALSE, results='hide'}
+psi_1 <- expression( (Y - gamma_1*X - gamma_2*A - gamma_3*A*X) * X )
+psi_2 <- expression( (Y - gamma_1*X - gamma_2*A - gamma_3*A*X) * A )
+psi_3 <- expression( (Y - gamma_1*X - gamma_2*A - gamma_3*A*X) * A*X )
+psi_4 <- expression( gamma_2 + gamma_3 * X - delta )
+psi <- list(psi_1, psi_2, psi_3, psi_4)
+```
+
+Let's also store all the estimated parameters $\hat{\theta}=(\hat{\gamma}_1,\hat{\gamma}_2,\hat{\gamma}_3,\hat{\delta})^T$ in a list.
+
+```{r, message=FALSE, warning=FALSE, results='hide'}
+thetas_hat <- list(gamma_1=gamma_1_hat,
+                  gamma_2=gamma_2_hat,
+                  gamma_3=gamma_3_hat,
+                  delta=delta_hat)
+```
+Let's pass the relevant arguments to `get_vcov` and check results for the  variance-covariance matrix.
+```{r, message=FALSE, warning=FALSE}
+res <- get_vcov(data=dat, thetas=thetas_hat, M=psi)
+res$vcov
+```
+
+Let's see how the results compare with standard errors obtained from the bootstrap.
+<details>
+<summary>*click here to see the bootstrap procedure*</summary>
+<br>
+```{r, message=FALSE, warning=FALSE}
+boot_fun <- function(d, i=1:nrow(d)) {
+  z<-d[i,]
+  mod <- lm(Y~ -1 + X + A + A:X, data = z)
+  gamma_1_hat <- coef(mod)[1]
+  gamma_2_hat <- coef(mod)[2]
+  gamma_3_hat <- coef(mod)[3]
+  delta_hat <- mean(gamma_2_hat*1 + gamma_3_hat*1*z$X)
+  return( c(gamma_1_hat, gamma_2_hat, gamma_3_hat, delta_hat) )
+}
+boot_start_time <- Sys.time()
+res_boot <- boot::boot(dat, boot_fun, R=999)
+boot_end_time <- Sys.time()
+paste("Bootstrapping took", round(as.numeric(boot_end_time - boot_start_time), 2), "seconds.")
+```
+</details>
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+cov(res_boot$t)
+Mestim_start_time <- Sys.time()
+res <- get_vcov(data=dat, thetas=thetas_hat, M=psi)
+Mestim_end_time <- Sys.time()
+#paste("Mestim took", round(as.numeric(Mestim_end_time - Mestim_start_time), 2), "seconds.")
+```
+This is pretty close to the results in `res$vcov` that we obtained `r round(as.numeric(boot_end_time - boot_start_time)/as.numeric(Mestim_end_time - Mestim_start_time),1)` times faster with `Mestim`.
+
+
+## Example 3: Value estimation for dynamic treatment regime
+Let's generate synthetic observational data for dynamic clinical decisions. We note $S_t$ the observed state at time $t$, $A_t$ the binary action taken at time $t$, and $Y$ the terminal outcome for the sequence where higher values indicate worse disease symptoms. For illustrative purpose, we consider only $T=2$ decision points so that we have data $Z=(S_1,A_1,S_2,A_2,Y)^T.$
+
+<details>
+<summary>*click here to see the data generating process.*</summary>
+<br>
+The data are generated via the following hidden Markov process, where we only get to observe $S_t$, which is a noisy version of the underlying state $X_t$:
+$$X_1 \sim \mathcal{N}(0,0.1)$$
+$$X_{t+1}|X_t, A_t \sim \mathbf{1}_{X_t>0} \mathcal{N}(1.1X_t - 0.5A_t, 0.05) + \mathbf{1}_{X_t<0}X_t$$
+$$S_t|X_t \sim \mathcal{N}(X_t,0.1)$$
+$$A_1|S_1 \sim \mathcal{B}\Big(\text{expit}(-0.1+\log S_t)\Big)$$
+$$A_2|S_2,A_1 \sim \mathcal{B}\Big(\text{expit}(0.1+\log S_t + 3A_1)\Big)$$
+
+$$Y|X_3,A_2,A_1 \sim \text{exp}\Bigg(\mathcal{N}\Big(X_3 + \lambda(A_2+A_1),0.1\Big)\Bigg).$$
+We consider that receiving treatment actions has a side effect penalty of $\lambda=0.1$.
+
+```{r, message=FALSE, warning=FALSE}
+gen_dtr_dat <- function(n, seed=456)
+{
+set.seed(seed)
+expit <- function(x) 1/(1+exp(-x))
+
+X_1 <- rnorm(n, sd=.1)
+S_1 <- exp(rnorm(n, mean = X_1, sd = .1))
+A_1 <- rbinom(n, size = 1, prob = expit(-.1+log(S_1)))
+
+X_2 <- (X_1>0) * rnorm(n, mean = 1.1*X_1 - .5 * A_1, sd=.05) + (X_1<0) * X_1
+S_2 <- exp(rnorm(n, mean = X_2, sd = .1))
+A_2 <- rbinom(n, size = 1, prob = expit(.1+log(S_2)+3*A_1))
+
+X_3 <- (X_2>0) * rnorm(n, mean = 1.1*X_2 - .5 * A_2, sd=.05) + (X_2<0) * X_2
+Y <- exp(rnorm(n, mean = X_3 + .1*(A_1 + A_2), sd = .1)) #0.1 penalty for treating
+
+dat <- data.frame(S_1=S_1, A_1=A_1, S_2=S_2, A_2=A_2, Y)  
+return(dat)
+}
+```
+</details>
+<br>
+```{r, message=FALSE, warning=FALSE}
+dat <- gen_dtr_dat(5000)
+head(dat)
+```
+Given any treatment action regime $d=\{d_1,\ldots, d_T\}^T$, an estimator for $\mathbb{E}_{Z\sim d}(Y)$ is 
+\begin{equation}
+\hat{\mathcal{V}}_{IPW}(d)=n^{-1}\sum_{i=1}^nY_i\prod_{t=1}^T\frac{\mathbf{1}\big({d_t(S_{t,i})=A_{t,i}}\big)}{\hat{e}_t\Big(S_{t,i},A_{t-1,i},S_{t-1,i}, \ldots,S_{1,i}\Big)^{d_t(S_{t,i})}\bigg\{1-\hat{e}_t\Big(S_{t,i},A_{t-1,i},S_{t-1,i}, \ldots,S_{1,i}\Big)\bigg\}^{1-d_t(S_{t,i})} } \quad \quad (1)
+\end{equation}
+
+where we write the relevant generalization of the propensity score as $e_t\Big(S_{t},A_{t-1},S_{t-1}, \ldots,S_{1}\Big)=\mathbb{E}\Big(A_{t}|S_{t},A_{t-1},S_{t-1}, \ldots,S_{1}\Big).$ 
+
+In this example we consider the regime $\tilde{d}=\{\tilde{d}_1(S_1)=\mathbf{1}_{S_1>1},\tilde{d}_2(S_2)=\mathbf{1}_{S_2>1}\}$. The goal is to calculate standard errors for $\hat{\mathcal{V}}_{IPW}(\tilde{d})$.
+As $T=2$, we need specify models for $e_1(S_1)$ and $e_2(S_2,A_1,S_1)$. Let's specify the parametric regression models 
+$$e_1(S_1;\boldsymbol{\delta})=\text{expit}\big(\delta_1+\delta_2\log S_1)$$ 
+and $$e_2(S_2,A_1,S_1;\boldsymbol{\phi})=\text{expit}\big(\phi_1+\phi_2\log S_2 +\phi_3A_1).$$ We fit and store the estimated parameters as follows.
+```{r, message=FALSE, warning=FALSE, results='hide'}
+e_1 <- glm(A_1~I(log(S_1)), data=dat, family = "binomial")
+delta_1_hat <- coef(e_1)[1]
+delta_2_hat <- coef(e_1)[2]
+
+e_2 <- glm(A_2~I(log(S_2)) + A_1 , data=dat, family = "binomial")
+phi_1_hat <- coef(e_2)[1]
+phi_2_hat <- coef(e_2)[2]
+phi_3_hat <- coef(e_2)[3]
+```
+As in example 1, recall that for $e_1$ the estimated parameters $\hat{\boldsymbol{\delta}}=(\hat{\delta}_1, \hat{\delta}_2)^T$ jointly solve
+$$\sum_{i=1}^{n}\Big[1+\exp\big\{-{(\delta_1+\delta_2 \log S_{1,i})\big\}\Big]^{-1}}-A_{1,i} =0,$$
+$$\sum_{i=1}^{n}\bigg(\Big[1+\exp\big\{-{(\delta_1+\delta_2 \log S_{1,i})\big\}\Big]^{-1}}-A_{1,i}\bigg) \log S_{1,i}=0.$$
+Similarly for $e_2$ the estimated parameters $\hat{\boldsymbol{\phi}}=(\hat{\phi}_1, \hat{\phi}_2, \hat{\phi}_3)^T$ jointly solve
+$$\sum_{i=1}^{n}\Big[1+\exp\big\{-{(\phi_1+\phi_2 \log S_{2,i}+\phi_3 A_{1,i})\big\}\Big]^{-1}}-A_{2,i} =0,$$
+$$\sum_{i=1}^{n}\bigg(\Big[1+\exp\big\{-{(\phi_1+\phi_2 \log S_{2,i}+\phi_3 A_{1,i})\big\}\Big]^{-1}}-A_{2,i}\bigg) \log S_{2,i}=0,$$
+$$\sum_{i=1}^{n}\bigg(\Big[1+\exp\big\{-{(\phi_1+\phi_2 \log S_{2,i}+\phi_3 A_{1,i})\big\}\Big]^{-1}}-A_{2,i}\bigg) A_{1,i}=0.$$
+
+Disregarding the summation sign, we can straightforwardly identify the five first elements of the estimating function $\psi(z,\theta)$. Let's store them before building our final list for $\psi$. 
+
+Note that for programming convenience, we recommend to store all relevant variable transformations as columns in the original dataframe.
+
+```{r, message=FALSE, warning=FALSE, results='hide'}
+dat$log_S_1 <- log(dat$S_1) ; dat$log_S_2 <- log(dat$S_2) # For ease of programming
+
+psi_1 <- expression( ((1/(1+exp(-(delta_1 + delta_2 * log_S_1)))) - A_1) * 1 )
+psi_2 <- expression( ((1/(1+exp(-(delta_1 + delta_2 * log_S_1)))) - A_1) * log_S_1)
+
+psi_3 <- expression( ((1/(1+exp(-(phi_1 + phi_2 * log_S_2 + phi_3 * A_1)))) - A_2) * 1 )
+psi_4 <- expression( ((1/(1+exp(-(phi_1 + phi_2 * log_S_2 + phi_3 * A_1)))) - A_2) * log_S_2)
+psi_5 <- expression( ((1/(1+exp(-(phi_1 + phi_2 * log_S_2 + phi_3 * A_1)))) - A_2) * A_1)
+```
+
+To obtain the last element of $\psi$, we need to do algebraic manipulations. Denoting $\mathcal{C}_{\tilde{d}, i}=\prod_{t=1}^2\mathbf{1}\big({\tilde{d}_t(S_{t,i})=A_{t,i}}\big)$ for simplicity, after substitution for $\hat{e}_1(S_1;\boldsymbol{\hat{\delta}})$ and $\hat{e}_2(S_2,A_1,S_1;\boldsymbol{\hat{\phi}})$, equation $(1)$ yields 
+
+\begin{equation}
+\hat{\mathcal{V}}_{IPW}(\tilde{d})=\\
+n^{-1}\sum_{i=1}^nY_i\mathcal{C}_{\tilde{d}, i}
+\frac{\Big[1+\exp\big\{-(\delta_1+\delta_2 \log S_{1,i})\big\}\Big]^{\tilde{d}_1(S_{1,i})} \Big[1+\exp\big\{-(\phi_1+\phi_2 \log S_{2,i}+\phi_3 A_{1,i})\big\}\Big]^{\tilde{d}_2(S_{2,i})}}
+{\bigg(1-\Big[1+\exp\big\{-(\delta_1+\delta_2 \log S_{1,i})\big\}\Big]^{-1}\bigg)^{1-\tilde{d}_1(S_{1,i})}\bigg(1-\Big[1+\exp\big\{-(\phi_1+\phi_2 \log S_{2,i}+\phi_3 A_{1,i})\big\}\Big]^{-1}\bigg)^{1-\tilde{d}_2(S_{2,i})}}.
+\end{equation}
+
+Rearrangements of the equation above yield
+\begin{equation}
+\sum_{i=1}^nY_i\mathcal{C}_{\tilde{d}, i}
+\frac{\Big[1+\exp\big\{-(\delta_1+\delta_2 \log S_{1,i})\big\}\Big]^{\tilde{d}_1(S_{1,i})} \Big[1+\exp\big\{-(\phi_1+\phi_2 \log S_{2,i}+\phi_3 A_{1,i})\big\}\Big]^{\tilde{d}_2(S_{2,i})}}
+{\bigg(1-\Big[1+\exp\big\{-(\delta_1+\delta_2 \log S_{1,i})\big\}\Big]^{-1}\bigg)^{1-\tilde{d}_1(S_{1,i})}\bigg(1-\Big[1+\exp\big\{-(\phi_1+\phi_2 \log S_{2,i}+\phi_3 A_{1,i})\big\}\Big]^{-1}\bigg)^{1-\tilde{d}_2(S_{2,i})}} \\
+-\hat{\mathcal{V}}_{IPW}(\tilde{d})=0.
+\end{equation}
+We can now straightforwardly identify and store the last elements of the estimating function $\psi$.
+```{r, message=FALSE, warning=FALSE, results='hide'}
+# The regime we are interested in
+dat$d_1 <- dat$S_1>1
+dat$d_2 <- dat$S_2>1
+
+# For ease of programming
+dat$C_d <- with(dat, d_1==A_1 & d_2==A_2)
+
+# Store the last element of psi
+psi_6 <- expression( Y * C_d *
+          (  (1+exp(-(delta_1 + delta_2 * log_S_1)))^d_1 * # numerator
+             (1+exp(-(phi_1 + phi_2 * log_S_2 + phi_3 * A_1)))^d_2  ) 
+          
+      /   (  (1-(1+exp(-(delta_1 + delta_2 * log_S_1)))^(-1))^(1-d_1) * # denominator
+             (1-(1+exp(-(phi_1 + phi_2 * log_S_2 + phi_3 * A_1)))^(-1))^(1-d_2)  ) 
+- V
+)
+```
+Let's now build a list detailing the full function $\psi(z,\theta)$.
+```{r, message=FALSE, warning=FALSE, results='hide'}
+psi <- list(psi_1, psi_2, psi_3, psi_4, psi_5, psi_6)
+```
+Now, let's compute $\hat{\mathcal{V}}_{IPW}(\tilde{d})$ and stack it in a list of all the estimated parameters $\hat{\theta}=\Big(\hat{\delta}_1,\hat{\delta}_2,\hat{\phi}_1,\hat{\phi}_2,\hat{\phi}_3, \hat{\mathcal{V}}_{IPW}(\tilde{d})\Big)^T$.
+
+For simplicity in computing $\hat{\mathcal{V}}_{IPW}(\tilde{d})$, we recommend to use a slightly modified version of `psi_6` as follows.
+```{r, message=FALSE, warning=FALSE, results='hide'}
+# Just delete "- V" from in the previous expression
+# add _hat as appropriate
+ipw_estimator <- expression( Y * C_d *
+          (  (1+exp(-(delta_1_hat + delta_2_hat * log_S_1)))^d_1 * # numerator
+             (1+exp(-(phi_1_hat + phi_2_hat * log_S_2 + phi_3_hat * A_1)))^d_2  ) 
+          
+      /   (  (1-(1+exp(-(delta_1_hat + delta_2_hat * log_S_1)))^(-1))^(1-d_1) * # denominator
+             (1-(1+exp(-(phi_1_hat + phi_2_hat * log_S_2 + phi_3_hat * A_1)))^(-1))^(1-d_2)  )  
+)
+
+# Compute individual contribution and take the average
+V_hat <- with(dat, mean(eval(ipw_estimator))) # Other ways to compute this quantity are OK too.
+
+thetas_hat <- list(delta_1=delta_1_hat,
+                   delta_2=delta_2_hat,
+                   phi_1=phi_1_hat,
+                   phi_2=phi_2_hat,
+                   phi_3=phi_3_hat,
+                   V=V_hat)
+```
+
+Let's pass the relevant arguments to `get_vcov` and check results for the standard errors.
+```{r, message=FALSE, warning=FALSE}
+res <- get_vcov(data=dat, thetas=thetas_hat, M=psi)
+res$se
+```
+Let’s see how the results compare with standard errors obtained from the bootstrap.
+<details>
+<summary>*click here to see the bootstrap procedure*</summary>
+<br>
+```{r, message=FALSE, warning=FALSE}
+boot_fun <- function(d, i=1:nrow(d)) {
+  z<-d[i,]
+  e_1 <- glm(A_1~I(log(S_1)), data=z, family = "binomial")
+  e_2 <- glm(A_2~I(log(S_2)) + A_1 , data=z, family = "binomial")
+
+  delta_1_hat <- coef(e_1)[1]
+  delta_2_hat <- coef(e_1)[2]
+  phi_1_hat <- coef(e_2)[1]
+  phi_2_hat <- coef(e_2)[2]
+  phi_3_hat <- coef(e_2)[3]
+
+  ipw_estimator <- expression( z$Y * z$C_d *
+            (  (1+exp(-(delta_1_hat + delta_2_hat * z$log_S_1)))^z$d_1 * # numerator
+               (1+exp(-(phi_1_hat + phi_2_hat * z$log_S_2 + phi_3_hat * z$A_1)))^z$d_2  ) 
+            
+        /   (  (1-(1+exp(-(delta_1_hat + delta_2_hat * z$log_S_1)))^(-1))^(1-z$d_1) * # denominator
+               (1-(1+exp(-(phi_1_hat + phi_2_hat * z$log_S_2 + phi_3_hat * z$A_1)))^(-1))^(1-z$d_2)  )  
+  )
+
+  V_hat <- mean(eval(ipw_estimator))
+  return( c(delta_1_hat, delta_2_hat, phi_1_hat, phi_2_hat, phi_3_hat, V_hat) )
+}
+boot_start_time <- Sys.time()
+res_boot <- boot::boot(dat, boot_fun, R=999)
+boot_end_time <- Sys.time()
+paste("Bootstrapping took", round(as.numeric(boot_end_time - boot_start_time), 2), "seconds.")
+```
+</details>
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+res_boot
+Mestim_start_time <- Sys.time()
+res <- get_vcov(data=dat, thetas=thetas_hat, M=psi)
+Mestim_end_time <- Sys.time()
+#paste("Mestim took", round(as.numeric(Mestim_end_time - Mestim_start_time), 2), "seconds.")
+```
+This is pretty close to the results in `res$se` that we obtained `r round(as.numeric(boot_end_time - boot_start_time)/as.numeric(Mestim_end_time - Mestim_start_time),1)` times faster with `Mestim`.
+
+## References
+Boos, D. D. and Stefanski, L. (2013). *Essential Statistical Inference*. Springer, New York. [https://doi.org/10.1007/978-1-4614-4818-1](https://doi.org/10.1007/978-1-4614-4818-1).
+
+Tsiatis, A. A., Davidian, M., Holloway, S. T. & Laber, E. B. (2019), *Dynamic Treatment Regimes: Statistical Methods for Precision Medicine*, CRC Press. [https://doi.org/10.1201/9780429192692](https://doi.org/10.1201/9780429192692).

@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+<meta name="date" content="2022-12-17" />
+
+<title>An Introduction to Mestim</title>
+
+<script src="data:application/javascript;base64,Ly8gUGFuZG9jIDIuOSBhZGRzIGF0dHJpYnV0ZXMgb24gYm90aCBoZWFkZXIgYW5kIGRpdi4gV2UgcmVtb3ZlIHRoZSBmb3JtZXIgKHRvCi8vIGJlIGNvbXBhdGlibGUgd2l0aCB0aGUgYmVoYXZpb3Igb2YgUGFuZG9jIDwgMi44KS4KZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcignRE9NQ29udGVudExvYWRlZCcsIGZ1bmN0aW9uKGUpIHsKICB2YXIgaHMgPSBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCJkaXYuc2VjdGlvbltjbGFzcyo9J2xldmVsJ10gPiA6Zmlyc3QtY2hpbGQiKTsKICB2YXIgaSwgaCwgYTsKICBmb3IgKGkgPSAwOyBpIDwgaHMubGVuZ3RoOyBpKyspIHsKICAgIGggPSBoc1tpXTsKICAgIGlmICghL15oWzEtNl0kL2kudGVzdChoLnRhZ05hbWUpKSBjb250aW51ZTsgIC8vIGl0IHNob3VsZCBiZSBhIGhlYWRlciBoMS1oNgogICAgYSA9IGguYXR0cmlidXRlczsKICAgIHdoaWxlIChhLmxlbmd0aCA+IDApIGgucmVtb3ZlQXR0cmlidXRlKGFbMF0ubmFtZSk7CiAgfQp9KTsK"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<link rel="stylesheet" href="data:text/css,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" type="text/css" />
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">An Introduction to <code>Mestim</code></h1>
+<h3 class="subtitle">Applied M-estimation and computation of the empirical sandwich variance.</h3>
+<h4 class="author">François Grolleau</h4>
+<address class="author_afil">
+Clincal epidemiology — Hôpital Hôtel-Dieu<br><h4 class="date">December 17, 2022</h4>
+
+
+
+<p>This vignette serves as a short introduction to computing the variance-covariance matrix of a multidimensional parameter using M-estimation and the empirical sandwich variance. You may want to check the latest version of this vignette on <a href="https://fcgrolleau.github.io/Mestim/vignette/vignette.html">GitHub</a>.</p>
+<div id="baby-review-of-m-estimation" class="section level2">
+<h2>Baby review of M-estimation</h2>
+<p>Denoting <span class="math inline">\(F\)</span> a probability distribution, a <span class="math inline">\(p\)</span>-dimensional M-estimator of <span class="math inline">\(\psi\)</span>-type <span class="math inline">\(T\)</span> solves the vector equation <span class="math display">\[\int_\mathcal{Z}\psi\big(z, T(F)\big)dF(z)=\boldsymbol{0}.\]</span> In practice, this means that the estimator <span class="math inline">\(T\)</span> has an <em>unbiased estimating function</em> <span class="math inline">\(\psi(z,\theta)=\{\psi_1(z,\theta), \ldots, \psi_p(z,\theta)\}^T\)</span> with solution <span class="math inline">\(\hat{\theta}~(p\times 1)\)</span> solving in <span class="math inline">\(\theta\)</span> the <span class="math inline">\((p\times 1)\)</span> set of “stacked” estimating equations given by <span class="math display">\[ \sum_{i=1}^{n}\psi(Z_i,\theta)=\boldsymbol{0}.\]</span> For a <span class="math inline">\(\psi\)</span>-type M-estimator <span class="math inline">\(T\)</span> with estimate <span class="math inline">\(\hat{\theta}\)</span>, under suitable regularity conditions for <span class="math inline">\(\psi\)</span>, the central limit theorem and Slutsky’s theorem yield <span class="math display">\[\sqrt{n}\big(\hat{\theta}-T(F)\big)\xrightarrow{\mathcal{D}}\mathcal{N}\big(0, \Sigma)\]</span> where <span class="math display">\[\Sigma=\Bigg[\mathbb{E}\bigg\{\frac{\partial \psi\big(Z,T(F)\big) }{\partial\theta^T}\bigg\}\Bigg]^{-1}\mathbb{E}\Big\{ \psi\big(Z,T(F)\big) \psi^T\big(Z,T(F)\big)\Big\}\Bigg[\mathbb{E}\bigg\{\frac{\partial \psi\big(Z,T(F)\big) }{\partial\theta^T}\bigg\}\Bigg]^{-T}.\]</span> This implies that the <span class="math inline">\(p\)</span>-dimensional M-estimator <span class="math inline">\(\hat{\theta}\)</span> is an asymptotically normal, <span class="math inline">\(\sqrt{n}\)</span>-consistent, estimator for <span class="math inline">\(T(F)\)</span>. See <a href="http://ndl.ethernet.edu.et/bitstream/123456789/61932/1/265.pdf">Boos and Stefanski (2013)</a> for a full introduction to M-estimation.</p>
+</div>
+<div id="what-mestim-does" class="section level2">
+<h2>What <code>Mestim</code> does</h2>
+<p>Provided with observed data <span class="math inline">\((Z_i)_{1≤i≤n}\)</span>, a <span class="math inline">\(p\)</span>-dimensional vector of estimates <span class="math inline">\(\hat{\theta}\)</span> and a <span class="math inline">\((p\times 1)\)</span> <em>unbiased estimating function</em> <span class="math inline">\(\psi\)</span>, the <code>Mestim</code> package computes the sandwich formula <span class="math display">\[\hat{\Sigma}=\Bigg[n^{-1}\sum_{i=1}^n\bigg\{\frac{\partial \psi\big(Z_i,\hat{\theta}\big) }{\partial\theta^T}\bigg\}\Bigg]^{-1}
+n^{-1}\sum_{i=1}^n\Big\{ \psi\big(Z_i,\hat{\theta}\big) \psi^T\big(Z_i,\hat{\theta}\big)\Big\}
+\Bigg[n^{-1}\sum_{i=1}^n\bigg\{\frac{\partial \psi\big(Z_i,\hat{\theta}\big) }{\partial\theta^T}\bigg\}\Bigg]^{-T}.\]</span> The estimated asymptotic variance-covariance matrix of <span class="math inline">\(\hat{\theta}\)</span> is <span class="math inline">\(n^{-1} \hat{\Sigma}\)</span>, and so, we have <span class="math display">\[\hat{\theta} \mathrel{\dot\sim} \mathcal{N}\big(0, n^{-1} \hat{\Sigma}).\]</span> Under the hood, <code>Mestim</code> algorithmically computes the Jacobian matrix of <span class="math inline">\(\psi\)</span>; derivatives and outer products in <span class="math inline">\(\hat{\Sigma}\)</span> are then computed in parallel. To compute the asymptotic variance-covariance matrix, the analyst thus only need to provide a list detailing the “stacked” estimating functions in <span class="math inline">\(\psi\)</span>. Below, we give examples of growing complexity to illustrate how <code>Mestim</code> can leverage the flexibility of M-estimation theory to calculate asymptotic standard errors (and confidence intervals) for parameter estimates <span class="math inline">\(\hat{\theta}\)</span>.</p>
+</div>
+<div id="example-1-prediction-task-via-logistic-regression" class="section level2">
+<h2>Example 1: Prediction task via logistic regression</h2>
+<p>Let’s try to compute the asymptotic standard errors of estimated parameters in a logistic regression model. This simple example serves to get familiar with <code>Mestim</code> commands.</p>
+Let’s generate synthetic data with two predictors and a binary outcome such that <span class="math inline">\(Z=(X_1,X_2,Y)^T\)</span>.
+<details>
+<summary>
+<em>click here to see the data generating process.</em>
+</summary>
+<p><br> Here we use <span class="math display">\[X_1 \sim \mathcal{N}(0,1)\]</span> <span class="math display">\[X_2 \sim \mathcal{N}(0,3)\]</span> <span class="math display">\[Y|X \sim \mathcal{B}\Big(\text{expit}(\beta_1^{0}X_1+\beta_2^{0}X_2)\Big)\]</span> with <span class="math inline">\(\beta_1^{0}=4\)</span>, <span class="math inline">\(\beta_2^{0}=6\)</span>.</p>
+<p>NB: We use superscript <span class="math inline">\(^{0}\)</span> to denote true values of the parameters.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>gen_lr_dat <span class="ot">&lt;-</span> <span class="cf">function</span>(n, <span class="at">seed=</span><span class="dv">123</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(seed)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>X_1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">sd =</span> <span class="dv">1</span>); X_2 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">sd =</span> <span class="dv">3</span>) <span class="co"># generate x_1 and x_2</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>true_betas <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">4</span>,<span class="dv">5</span>) <span class="co"># generate true parameters</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~-</span><span class="dv">1</span><span class="sc">+</span>X_1<span class="sc">+</span>X_2) <span class="co"># build the design matrix</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>X <span class="sc">%*%</span> true_betas)) ) <span class="co"># generate Y from X and true_betas</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>dat  <span class="ot">&lt;-</span>  <span class="fu">data.frame</span>(<span class="at">X_1=</span>X_1, <span class="at">X_2=</span>X_2, <span class="at">Y=</span>Y) <span class="co"># build a simulated dataset</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">return</span>(dat)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+</details>
+<p><br></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">gen_lr_dat</span>(<span class="dv">5000</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dat)</span></code></pre></div>
+<pre><code>##           X_1       X_2 Y
+## 1 -0.56047565 -1.482522 0
+## 2 -0.23017749  3.382780 1
+## 3  1.55870831 -3.440849 0
+## 4  0.07050839  4.443056 1
+## 5  0.12928774  2.748574 1
+## 6  1.71506499  1.005393 1</code></pre>
+<p>Let’s fit a logistic regression model and put the estimated parameters in a list.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y<span class="sc">~-</span><span class="dv">1</span> <span class="sc">+</span> X_1 <span class="sc">+</span> X_2, <span class="at">data=</span>dat, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>thetas_hat <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">thetas_1=</span><span class="fu">coef</span>(mod)[<span class="dv">1</span>], <span class="at">thetas_2=</span><span class="fu">coef</span>(mod)[<span class="dv">2</span>])</span></code></pre></div>
+<p>Recall that the estimated parameters <span class="math inline">\(\hat{\theta}=(\hat{\theta}_1, \hat{\theta}_2)^T\)</span> from this logistic regression model jointly solve <span class="math display">\[\sum_{i=1}^{n}\bigg(\Big[1+\exp\big\{-{(\theta_1X_{1,i}+\theta_2X_{2,i})\big\}\Big]^{-1}}-Y_i\bigg)X_{1,i}
+=0\]</span> and <span class="math display">\[\sum_{i=1}^{n}\bigg(\Big[1+\exp\big\{-{(\theta_1X_{1,i}+\theta_2X_{2,i})\big\}\Big]^{-1}}-Y_i\bigg)X_{2,i}
+=0.\]</span> Therefore, we can identify <span class="math display">\[\psi_1(Z_i,\theta_1)=\bigg(\Big[1+\exp\big\{-{(\theta_1X_{1,i}+\theta_2X_{2,i})\big\}\Big]^{-1}}-Y_i\bigg)X_{1,i}\]</span> and <span class="math display">\[\psi_2(Z_i,\theta_1)=\bigg(\Big[1+\exp\big\{-{(\theta_1X_{1,i}+\theta_2X_{2,i})\big\}\Big]^{-1}}-Y_i\bigg)X_{2,i}.\]</span> With that in mind, let’s build a list for the unbiased estimating function <span class="math inline">\(\psi(z,\theta)=\Big(\psi_1(z,\theta_1), \psi_2(z,\theta_2)\Big)^T\)</span>.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>psi_1 <span class="ot">&lt;-</span> <span class="fu">expression</span>( ((<span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>(thetas_1 <span class="sc">*</span> X_1 <span class="sc">+</span> thetas_2 <span class="sc">*</span> X_2)))) <span class="sc">-</span> Y) <span class="sc">*</span> X_1 )</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>psi_2 <span class="ot">&lt;-</span> <span class="fu">expression</span>( ((<span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>(thetas_1 <span class="sc">*</span> X_1 <span class="sc">+</span> thetas_2 <span class="sc">*</span> X_2)))) <span class="sc">-</span> Y) <span class="sc">*</span> X_2 )</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>psi <span class="ot">&lt;-</span> <span class="fu">list</span>(psi_1, psi_2)</span></code></pre></div>
+<p>NB: parameters’ names (here <code>thetas_1</code> and <code>thetas_2</code>) must be consistent with the previous list.</p>
+<p>We are finally ready to pass these arguments to the <code>get_vcov</code> function form the <code>Mestim</code> package.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(Mestim)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">get_vcov</span>(<span class="at">data=</span>dat, <span class="at">thetas=</span>thetas_hat, <span class="at">M=</span>psi)</span></code></pre></div>
+<p>You can obtain the variance-covariance matrix from a <code>get_vcov</code> result as follows</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>res<span class="sc">$</span>vcov</span></code></pre></div>
+<pre><code>##            thetas_1   thetas_2
+## thetas_1 0.05239025 0.05366863
+## thetas_2 0.05366863 0.06795271</code></pre>
+<details>
+<summary>
+<em>click here to verify that the variance-covariance matrix from <code>get_vcov</code> is similar to that of <code>glm</code>.</em>
+</summary>
+<p><br></p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">vcov</span>(mod)</span></code></pre></div>
+<pre><code>##            X_1        X_2
+## X_1 0.05698408 0.06143937
+## X_2 0.06143937 0.07963092</code></pre>
+This is indeed very close the results in<code>res$vcov</code>.
+</details>
+<p><br> Asymptotic standard errors are square root of the diagonal elements from the estimated variance-covariance matrix. These are stored in the <code>se</code> attribute.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>res<span class="sc">$</span>se</span></code></pre></div>
+<pre><code>##  thetas_1  thetas_2 
+## 0.2288892 0.2606774</code></pre>
+</div>
+<div id="example-2-average-treatment-effect-via-outcome-regression" class="section level2">
+<h2>Example 2: Average treatment effect via outcome regression</h2>
+<p>Let’s generate synthetic observational data with treatment allocation <span class="math inline">\(A\)</span>, continuous outcome <span class="math inline">\(Y\)</span> and a single confounder <span class="math inline">\(X\)</span> such that <span class="math inline">\(Z=(X,A,Y)^T\)</span>.</p>
+<details>
+<summary>
+<em>click here to see the data generating process.</em>
+</summary>
+<p><br> Here we use <span class="math display">\[X \sim \mathcal{N}(0,1)\]</span> <span class="math display">\[A|X \sim \mathcal{B}\Big(\text{expit}(2X)\Big)\]</span> <span class="math display">\[\epsilon \sim \mathcal{N}(0,20)\]</span> <span class="math display">\[Y|X,\epsilon = \gamma_1^{0} X + \gamma_2^{0} A + \gamma_3^{0} AX + \epsilon\]</span> with <span class="math inline">\(\gamma_1^{0}=4\)</span>, <span class="math inline">\(\gamma_2^{0}=3\)</span>, and <span class="math inline">\(\gamma_3^{0}=2\)</span>.</p>
+<p>NB: We use superscript <span class="math inline">\(^{0}\)</span> to denote true values of the parameters.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>gen_obs_dat <span class="ot">&lt;-</span> <span class="cf">function</span>(n, <span class="at">seed=</span><span class="dv">123</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(seed)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n) <span class="co"># generate X</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> X)) )  <span class="co"># generate treatment allocation A</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>X_mat <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> X <span class="sc">+</span> A <span class="sc">+</span> A<span class="sc">:</span>X) <span class="co"># build the design matrix</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>true_gammas <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">2</span>) </span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>epsi <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n,<span class="dv">0</span>,<span class="dv">20</span>) <span class="co"># generate gaussian noise </span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> (X_mat <span class="sc">%*%</span> true_gammas) <span class="sc">+</span> epsi <span class="co"># generate observed outcomes </span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>dat  <span class="ot">&lt;-</span>  <span class="fu">data.frame</span>(<span class="at">X=</span>X, <span class="at">A=</span>A, <span class="at">Y=</span>Y) <span class="co"># build a simulated dataset</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="fu">return</span>(dat)</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+</details>
+<p><br></p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">gen_obs_dat</span>(<span class="dv">5000</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dat)</span></code></pre></div>
+<pre><code>##             X A          Y
+## 1 -0.56047565 0   4.758148
+## 2 -0.23017749 0  15.368124
+## 3  1.55870831 1   2.018927
+## 4  0.07050839 1 -50.422238
+## 5  0.12928774 1 -18.163366
+## 6  1.71506499 1 -11.819112</code></pre>
+<p>In this example, the goal is to calculate standard errors for the outcome regression average causal effect estimator <span class="math display">\[\hat{\delta}=n^{-1}\sum_{i=1}^n\mathbb{\hat{E}}(Y|X=X_i, A=1)-\mathbb{\hat{E}}(Y|X=X_i, A=0).\]</span></p>
+<p>For <span class="math inline">\(\mathbb{E}(Y|X, A)\)</span>, let’s specify the regression model <span class="math inline">\(m(X, A;\boldsymbol{\gamma})=\gamma_1X + \gamma_2A + \gamma_3AX\)</span> and store the estimated parameters.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">lm</span>(Y<span class="sc">~</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> X <span class="sc">+</span> A <span class="sc">+</span> A<span class="sc">:</span>X, <span class="at">data =</span> dat)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>gamma_1_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(m)[<span class="dv">1</span>]</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>gamma_2_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(m)[<span class="dv">2</span>]</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>gamma_3_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(m)[<span class="dv">3</span>]</span></code></pre></div>
+<p>Recall that the estimated parameters <span class="math inline">\(\hat{\boldsymbol{\gamma}}=(\hat{\gamma}_1,\hat{\gamma}_2,\hat{\gamma}_3)^T\)</span> from this linear regression model jointly solve <span class="math display">\[\sum_{i=1}^n (Y_i-\gamma_1X_i - \gamma_2A_i - \gamma_3A_iX_i)X_i=0,\]</span> <span class="math display">\[\sum_{i=1}^n (Y_i-\gamma_1X_i - \gamma_2A_i - \gamma_3A_iX_i)A_i=0,\]</span> <span class="math display">\[\sum_{i=1}^n (Y_i-\gamma_1X_i - \gamma_2A_i - \gamma_3A_iX_i)A_iX_i=0.\]</span> Disregarding the summation sign, we can straightforwardly identify the three first elements of the estimating function <span class="math inline">\(\psi(z,\theta)\)</span>. Before building a list detailing the function <span class="math inline">\(\psi\)</span>, we need to identify the estimating function of our main parameter of interest <span class="math inline">\(\delta.\)</span> To do so, recall that we can estimate <span class="math inline">\(\delta\)</span> as <span class="math display">\[\hat{\delta}=n^{-1}\sum_{i=1}^nm(X_i,1;\hat{\boldsymbol{\gamma}})-m(X_i,0;\hat{\boldsymbol{\gamma}}) \\
+=n^{-1}\sum_{i=1}^n\{\hat{\gamma}_1+ \hat{\gamma}_2 \times 1 +\hat{\gamma}_3 \times 1 \times X_i\} - 
+\{\hat{\gamma}_1+ \hat{\gamma}_2 \times 0 +\hat{\gamma}_3 \times 0 \times X_i\} \\
+=n^{-1}\sum_{i=1}^n \hat{\gamma}_2 +\hat{\gamma}_3 X_i.
+\]</span> Let’s first compute it.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>delta_hat <span class="ot">&lt;-</span> <span class="fu">mean</span>(gamma_2_hat <span class="sc">+</span> gamma_3_hat<span class="sc">*</span>dat<span class="sc">$</span>X)</span></code></pre></div>
+<p>Note that rearranging the last equality we have <span class="math display">\[\sum_{i=1}^n \hat{\gamma}_2 +\hat{\gamma}_3 X_i - \hat{\delta} = 0\]</span> which straightforwardly yields the last element of the estimating function <span class="math inline">\(\psi(z,\theta)\)</span>. Disregarding the summation sign yields the last estimating function which we can now “stack” with the previous ones. Let’s now build a list detailing the full function <span class="math inline">\(\psi(z,\theta)\)</span>.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>psi_1 <span class="ot">&lt;-</span> <span class="fu">expression</span>( (Y <span class="sc">-</span> gamma_1<span class="sc">*</span>X <span class="sc">-</span> gamma_2<span class="sc">*</span>A <span class="sc">-</span> gamma_3<span class="sc">*</span>A<span class="sc">*</span>X) <span class="sc">*</span> X )</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>psi_2 <span class="ot">&lt;-</span> <span class="fu">expression</span>( (Y <span class="sc">-</span> gamma_1<span class="sc">*</span>X <span class="sc">-</span> gamma_2<span class="sc">*</span>A <span class="sc">-</span> gamma_3<span class="sc">*</span>A<span class="sc">*</span>X) <span class="sc">*</span> A )</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>psi_3 <span class="ot">&lt;-</span> <span class="fu">expression</span>( (Y <span class="sc">-</span> gamma_1<span class="sc">*</span>X <span class="sc">-</span> gamma_2<span class="sc">*</span>A <span class="sc">-</span> gamma_3<span class="sc">*</span>A<span class="sc">*</span>X) <span class="sc">*</span> A<span class="sc">*</span>X )</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>psi_4 <span class="ot">&lt;-</span> <span class="fu">expression</span>( gamma_2 <span class="sc">+</span> gamma_3 <span class="sc">*</span> X <span class="sc">-</span> delta )</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>psi <span class="ot">&lt;-</span> <span class="fu">list</span>(psi_1, psi_2, psi_3, psi_4)</span></code></pre></div>
+<p>Let’s also store all the estimated parameters <span class="math inline">\(\hat{\theta}=(\hat{\gamma}_1,\hat{\gamma}_2,\hat{\gamma}_3,\hat{\delta})^T\)</span> in a list.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>thetas_hat <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">gamma_1=</span>gamma_1_hat,</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">gamma_2=</span>gamma_2_hat,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">gamma_3=</span>gamma_3_hat,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">delta=</span>delta_hat)</span></code></pre></div>
+<p>Let’s pass the relevant arguments to <code>get_vcov</code> and check results for the variance-covariance matrix.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">get_vcov</span>(<span class="at">data=</span>dat, <span class="at">thetas=</span>thetas_hat, <span class="at">M=</span>psi)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>res<span class="sc">$</span>vcov</span></code></pre></div>
+<pre><code>##               gamma_1       gamma_2    gamma_3         delta
+## gamma_1  1.686258e-01 -5.116353e-17 -0.1686258  2.291608e-05
+## gamma_2 -4.167777e-17  2.510135e-01 -0.1497095  2.509786e-01
+## gamma_3 -1.686258e-01 -1.497095e-01  0.4228791 -1.496732e-01
+## delta    2.291608e-05  2.509786e-01 -0.1496732  2.512757e-01</code></pre>
+Let’s see how the results compare with standard errors obtained from the bootstrap.
+<details>
+<summary>
+<em>click here to see the bootstrap procedure</em>
+</summary>
+<p><br></p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>boot_fun <span class="ot">&lt;-</span> <span class="cf">function</span>(d, <span class="at">i=</span><span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(d)) {</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  z<span class="ot">&lt;-</span>d[i,]</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(Y<span class="sc">~</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> X <span class="sc">+</span> A <span class="sc">+</span> A<span class="sc">:</span>X, <span class="at">data =</span> z)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  gamma_1_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(mod)[<span class="dv">1</span>]</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  gamma_2_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(mod)[<span class="dv">2</span>]</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  gamma_3_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(mod)[<span class="dv">3</span>]</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  delta_hat <span class="ot">&lt;-</span> <span class="fu">mean</span>(gamma_2_hat<span class="sc">*</span><span class="dv">1</span> <span class="sc">+</span> gamma_3_hat<span class="sc">*</span><span class="dv">1</span><span class="sc">*</span>z<span class="sc">$</span>X)</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>( <span class="fu">c</span>(gamma_1_hat, gamma_2_hat, gamma_3_hat, delta_hat) )</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>boot_start_time <span class="ot">&lt;-</span> <span class="fu">Sys.time</span>()</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>res_boot <span class="ot">&lt;-</span> boot<span class="sc">::</span><span class="fu">boot</span>(dat, boot_fun, <span class="at">R=</span><span class="dv">999</span>)</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>boot_end_time <span class="ot">&lt;-</span> <span class="fu">Sys.time</span>()</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="st">&quot;Bootstrapping took&quot;</span>, <span class="fu">round</span>(<span class="fu">as.numeric</span>(boot_end_time <span class="sc">-</span> boot_start_time), <span class="dv">2</span>), <span class="st">&quot;seconds.&quot;</span>)</span></code></pre></div>
+<pre><code>## [1] &quot;Bootstrapping took 3.91 seconds.&quot;</code></pre>
+</details>
+<pre><code>##              [,1]        [,2]       [,3]         [,4]
+## [1,]  0.166959339 -0.00255421 -0.1636470 -0.002452947
+## [2,] -0.002554210  0.24003558 -0.1433816  0.240057058
+## [3,] -0.163647006 -0.14338163  0.4128908 -0.143436074
+## [4,] -0.002452947  0.24005706 -0.1434361  0.240449603</code></pre>
+<p>This is pretty close to the results in <code>res$vcov</code> that we obtained 52.4 times faster with <code>Mestim</code>.</p>
+</div>
+<div id="example-3-value-estimation-for-dynamic-treatment-regime" class="section level2">
+<h2>Example 3: Value estimation for dynamic treatment regime</h2>
+<p>Let’s generate synthetic observational data for dynamic clinical decisions. We note <span class="math inline">\(S_t\)</span> the observed state at time <span class="math inline">\(t\)</span>, <span class="math inline">\(A_t\)</span> the binary action taken at time <span class="math inline">\(t\)</span>, and <span class="math inline">\(Y\)</span> the terminal outcome for the sequence where higher values indicate worse disease symptoms. For illustrative purpose, we consider only <span class="math inline">\(T=2\)</span> decision points so that we have data <span class="math inline">\(Z=(S_1,A_1,S_2,A_2,Y)^T.\)</span></p>
+<details>
+<summary>
+<em>click here to see the data generating process.</em>
+</summary>
+<p><br> The data are generated via the following hidden Markov process, where we only get to observe <span class="math inline">\(S_t\)</span>, which is a noisy version of the underlying state <span class="math inline">\(X_t\)</span>: <span class="math display">\[X_1 \sim \mathcal{N}(0,0.1)\]</span> <span class="math display">\[X_{t+1}|X_t, A_t \sim \mathbf{1}_{X_t&gt;0} \mathcal{N}(1.1X_t - 0.5A_t, 0.05) + \mathbf{1}_{X_t&lt;0}X_t\]</span> <span class="math display">\[S_t|X_t \sim \mathcal{N}(X_t,0.1)\]</span> <span class="math display">\[A_1|S_1 \sim \mathcal{B}\Big(\text{expit}(-0.1+\log S_t)\Big)\]</span> <span class="math display">\[A_2|S_2,A_1 \sim \mathcal{B}\Big(\text{expit}(0.1+\log S_t + 3A_1)\Big)\]</span></p>
+<p><span class="math display">\[Y|X_3,A_2,A_1 \sim \text{exp}\Bigg(\mathcal{N}\Big(X_3 + \lambda(A_2+A_1),0.1\Big)\Bigg).\]</span> We consider that receiving treatment actions has a side effect penalty of <span class="math inline">\(\lambda=0.1\)</span>.</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>gen_dtr_dat <span class="ot">&lt;-</span> <span class="cf">function</span>(n, <span class="at">seed=</span><span class="dv">456</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(seed)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>expit <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>x))</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>X_1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">sd=</span>.<span class="dv">1</span>)</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>S_1 <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="fu">rnorm</span>(n, <span class="at">mean =</span> X_1, <span class="at">sd =</span> .<span class="dv">1</span>))</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>A_1 <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> <span class="fu">expit</span>(<span class="sc">-</span>.<span class="dv">1</span><span class="sc">+</span><span class="fu">log</span>(S_1)))</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>X_2 <span class="ot">&lt;-</span> (X_1<span class="sc">&gt;</span><span class="dv">0</span>) <span class="sc">*</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="fl">1.1</span><span class="sc">*</span>X_1 <span class="sc">-</span> .<span class="dv">5</span> <span class="sc">*</span> A_1, <span class="at">sd=</span>.<span class="dv">05</span>) <span class="sc">+</span> (X_1<span class="sc">&lt;</span><span class="dv">0</span>) <span class="sc">*</span> X_1</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>S_2 <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="fu">rnorm</span>(n, <span class="at">mean =</span> X_2, <span class="at">sd =</span> .<span class="dv">1</span>))</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>A_2 <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> <span class="fu">expit</span>(.<span class="dv">1</span><span class="sc">+</span><span class="fu">log</span>(S_2)<span class="sc">+</span><span class="dv">3</span><span class="sc">*</span>A_1))</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>X_3 <span class="ot">&lt;-</span> (X_2<span class="sc">&gt;</span><span class="dv">0</span>) <span class="sc">*</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="fl">1.1</span><span class="sc">*</span>X_2 <span class="sc">-</span> .<span class="dv">5</span> <span class="sc">*</span> A_2, <span class="at">sd=</span>.<span class="dv">05</span>) <span class="sc">+</span> (X_2<span class="sc">&lt;</span><span class="dv">0</span>) <span class="sc">*</span> X_2</span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="fu">rnorm</span>(n, <span class="at">mean =</span> X_3 <span class="sc">+</span> .<span class="dv">1</span><span class="sc">*</span>(A_1 <span class="sc">+</span> A_2), <span class="at">sd =</span> .<span class="dv">1</span>)) <span class="co">#0.1 penalty for treating</span></span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">S_1=</span>S_1, <span class="at">A_1=</span>A_1, <span class="at">S_2=</span>S_2, <span class="at">A_2=</span>A_2, Y)  </span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a><span class="fu">return</span>(dat)</span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+</details>
+<p><br></p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">gen_dtr_dat</span>(<span class="dv">5000</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dat)</span></code></pre></div>
+<pre><code>##         S_1 A_1       S_2 A_2        Y
+## 1 0.8402181   1 0.9292966   1 1.046362
+## 2 1.0033476   0 1.0623962   0 1.024897
+## 3 1.0889107   0 1.0687287   0 1.152630
+## 4 0.8716224   1 0.8938716   1 1.069209
+## 5 0.9743708   1 0.9324451   1 1.189594
+## 6 1.0222173   1 0.9174528   1 1.195341</code></pre>
+<p>Given any treatment action regime <span class="math inline">\(d=\{d_1,\ldots, d_T\}^T\)</span>, an estimator for <span class="math inline">\(\mathbb{E}_{Z\sim d}(Y)\)</span> is <span class="math display">\[\begin{equation}
+\hat{\mathcal{V}}_{IPW}(d)=n^{-1}\sum_{i=1}^nY_i\prod_{t=1}^T\frac{\mathbf{1}\big({d_t(S_{t,i})=A_{t,i}}\big)}{\hat{e}_t\Big(S_{t,i},A_{t-1,i},S_{t-1,i}, \ldots,S_{1,i}\Big)^{d_t(S_{t,i})}\bigg\{1-\hat{e}_t\Big(S_{t,i},A_{t-1,i},S_{t-1,i}, \ldots,S_{1,i}\Big)\bigg\}^{1-d_t(S_{t,i})} } \quad \quad (1)
+\end{equation}\]</span></p>
+<p>where we write the relevant generalization of the propensity score as <span class="math inline">\(e_t\Big(S_{t},A_{t-1},S_{t-1}, \ldots,S_{1}\Big)=\mathbb{E}\Big(A_{t}|S_{t},A_{t-1},S_{t-1}, \ldots,S_{1}\Big).\)</span></p>
+<p>In this example we consider the regime <span class="math inline">\(\tilde{d}=\{\tilde{d}_1(S_1)=\mathbf{1}_{S_1&gt;1},\tilde{d}_2(S_2)=\mathbf{1}_{S_2&gt;1}\}\)</span>. The goal is to calculate standard errors for <span class="math inline">\(\hat{\mathcal{V}}_{IPW}(\tilde{d})\)</span>. As <span class="math inline">\(T=2\)</span>, we need specify models for <span class="math inline">\(e_1(S_1)\)</span> and <span class="math inline">\(e_2(S_2,A_1,S_1)\)</span>. Let’s specify the parametric regression models <span class="math display">\[e_1(S_1;\boldsymbol{\delta})=\text{expit}\big(\delta_1+\delta_2\log S_1)\]</span> and <span class="math display">\[e_2(S_2,A_1,S_1;\boldsymbol{\phi})=\text{expit}\big(\phi_1+\phi_2\log S_2 +\phi_3A_1).\]</span> We fit and store the estimated parameters as follows.</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>e_1 <span class="ot">&lt;-</span> <span class="fu">glm</span>(A_1<span class="sc">~</span><span class="fu">I</span>(<span class="fu">log</span>(S_1)), <span class="at">data=</span>dat, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>delta_1_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(e_1)[<span class="dv">1</span>]</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>delta_2_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(e_1)[<span class="dv">2</span>]</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>e_2 <span class="ot">&lt;-</span> <span class="fu">glm</span>(A_2<span class="sc">~</span><span class="fu">I</span>(<span class="fu">log</span>(S_2)) <span class="sc">+</span> A_1 , <span class="at">data=</span>dat, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>phi_1_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(e_2)[<span class="dv">1</span>]</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>phi_2_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(e_2)[<span class="dv">2</span>]</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>phi_3_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(e_2)[<span class="dv">3</span>]</span></code></pre></div>
+<p>As in example 1, recall that for <span class="math inline">\(e_1\)</span> the estimated parameters <span class="math inline">\(\hat{\boldsymbol{\delta}}=(\hat{\delta}_1, \hat{\delta}_2)^T\)</span> jointly solve <span class="math display">\[\sum_{i=1}^{n}\Big[1+\exp\big\{-{(\delta_1+\delta_2 \log S_{1,i})\big\}\Big]^{-1}}-A_{1,i} =0,\]</span> <span class="math display">\[\sum_{i=1}^{n}\bigg(\Big[1+\exp\big\{-{(\delta_1+\delta_2 \log S_{1,i})\big\}\Big]^{-1}}-A_{1,i}\bigg) \log S_{1,i}=0.\]</span> Similarly for <span class="math inline">\(e_2\)</span> the estimated parameters <span class="math inline">\(\hat{\boldsymbol{\phi}}=(\hat{\phi}_1, \hat{\phi}_2, \hat{\phi}_3)^T\)</span> jointly solve <span class="math display">\[\sum_{i=1}^{n}\Big[1+\exp\big\{-{(\phi_1+\phi_2 \log S_{2,i}+\phi_3 A_{1,i})\big\}\Big]^{-1}}-A_{2,i} =0,\]</span> <span class="math display">\[\sum_{i=1}^{n}\bigg(\Big[1+\exp\big\{-{(\phi_1+\phi_2 \log S_{2,i}+\phi_3 A_{1,i})\big\}\Big]^{-1}}-A_{2,i}\bigg) \log S_{2,i}=0,\]</span> <span class="math display">\[\sum_{i=1}^{n}\bigg(\Big[1+\exp\big\{-{(\phi_1+\phi_2 \log S_{2,i}+\phi_3 A_{1,i})\big\}\Big]^{-1}}-A_{2,i}\bigg) A_{1,i}=0.\]</span></p>
+<p>Disregarding the summation sign, we can straightforwardly identify the five first elements of the estimating function <span class="math inline">\(\psi(z,\theta)\)</span>. Let’s store them before building our final list for <span class="math inline">\(\psi\)</span>.</p>
+<p>Note that for programming convenience, we recommend to store all relevant variable transformations as columns in the original dataframe.</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>dat<span class="sc">$</span>log_S_1 <span class="ot">&lt;-</span> <span class="fu">log</span>(dat<span class="sc">$</span>S_1) ; dat<span class="sc">$</span>log_S_2 <span class="ot">&lt;-</span> <span class="fu">log</span>(dat<span class="sc">$</span>S_2) <span class="co"># For ease of programming</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>psi_1 <span class="ot">&lt;-</span> <span class="fu">expression</span>( ((<span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>(delta_1 <span class="sc">+</span> delta_2 <span class="sc">*</span> log_S_1)))) <span class="sc">-</span> A_1) <span class="sc">*</span> <span class="dv">1</span> )</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>psi_2 <span class="ot">&lt;-</span> <span class="fu">expression</span>( ((<span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>(delta_1 <span class="sc">+</span> delta_2 <span class="sc">*</span> log_S_1)))) <span class="sc">-</span> A_1) <span class="sc">*</span> log_S_1)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>psi_3 <span class="ot">&lt;-</span> <span class="fu">expression</span>( ((<span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>(phi_1 <span class="sc">+</span> phi_2 <span class="sc">*</span> log_S_2 <span class="sc">+</span> phi_3 <span class="sc">*</span> A_1)))) <span class="sc">-</span> A_2) <span class="sc">*</span> <span class="dv">1</span> )</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>psi_4 <span class="ot">&lt;-</span> <span class="fu">expression</span>( ((<span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>(phi_1 <span class="sc">+</span> phi_2 <span class="sc">*</span> log_S_2 <span class="sc">+</span> phi_3 <span class="sc">*</span> A_1)))) <span class="sc">-</span> A_2) <span class="sc">*</span> log_S_2)</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>psi_5 <span class="ot">&lt;-</span> <span class="fu">expression</span>( ((<span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>(phi_1 <span class="sc">+</span> phi_2 <span class="sc">*</span> log_S_2 <span class="sc">+</span> phi_3 <span class="sc">*</span> A_1)))) <span class="sc">-</span> A_2) <span class="sc">*</span> A_1)</span></code></pre></div>
+<p>To obtain the last element of <span class="math inline">\(\psi\)</span>, we need to do algebraic manipulations. Denoting <span class="math inline">\(\mathcal{C}_{\tilde{d}, i}=\prod_{t=1}^2\mathbf{1}\big({\tilde{d}_t(S_{t,i})=A_{t,i}}\big)\)</span> for simplicity, after substitution for <span class="math inline">\(\hat{e}_1(S_1;\boldsymbol{\hat{\delta}})\)</span> and <span class="math inline">\(\hat{e}_2(S_2,A_1,S_1;\boldsymbol{\hat{\phi}})\)</span>, equation <span class="math inline">\((1)\)</span> yields</p>
+<p><span class="math display">\[\begin{equation}
+\hat{\mathcal{V}}_{IPW}(\tilde{d})=\\
+n^{-1}\sum_{i=1}^nY_i\mathcal{C}_{\tilde{d}, i}
+\frac{\Big[1+\exp\big\{-(\delta_1+\delta_2 \log S_{1,i})\big\}\Big]^{\tilde{d}_1(S_{1,i})} \Big[1+\exp\big\{-(\phi_1+\phi_2 \log S_{2,i}+\phi_3 A_{1,i})\big\}\Big]^{\tilde{d}_2(S_{2,i})}}
+{\bigg(1-\Big[1+\exp\big\{-(\delta_1+\delta_2 \log S_{1,i})\big\}\Big]^{-1}\bigg)^{1-\tilde{d}_1(S_{1,i})}\bigg(1-\Big[1+\exp\big\{-(\phi_1+\phi_2 \log S_{2,i}+\phi_3 A_{1,i})\big\}\Big]^{-1}\bigg)^{1-\tilde{d}_2(S_{2,i})}}.
+\end{equation}\]</span></p>
+<p>Rearrangements of the equation above yield <span class="math display">\[\begin{equation}
+\sum_{i=1}^nY_i\mathcal{C}_{\tilde{d}, i}
+\frac{\Big[1+\exp\big\{-(\delta_1+\delta_2 \log S_{1,i})\big\}\Big]^{\tilde{d}_1(S_{1,i})} \Big[1+\exp\big\{-(\phi_1+\phi_2 \log S_{2,i}+\phi_3 A_{1,i})\big\}\Big]^{\tilde{d}_2(S_{2,i})}}
+{\bigg(1-\Big[1+\exp\big\{-(\delta_1+\delta_2 \log S_{1,i})\big\}\Big]^{-1}\bigg)^{1-\tilde{d}_1(S_{1,i})}\bigg(1-\Big[1+\exp\big\{-(\phi_1+\phi_2 \log S_{2,i}+\phi_3 A_{1,i})\big\}\Big]^{-1}\bigg)^{1-\tilde{d}_2(S_{2,i})}} \\
+-\hat{\mathcal{V}}_{IPW}(\tilde{d})=0.
+\end{equation}\]</span> We can now straightforwardly identify and store the last elements of the estimating function <span class="math inline">\(\psi\)</span>.</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The regime we are interested in</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>dat<span class="sc">$</span>d_1 <span class="ot">&lt;-</span> dat<span class="sc">$</span>S_1<span class="sc">&gt;</span><span class="dv">1</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>dat<span class="sc">$</span>d_2 <span class="ot">&lt;-</span> dat<span class="sc">$</span>S_2<span class="sc">&gt;</span><span class="dv">1</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="co"># For ease of programming</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>dat<span class="sc">$</span>C_d <span class="ot">&lt;-</span> <span class="fu">with</span>(dat, d_1<span class="sc">==</span>A_1 <span class="sc">&amp;</span> d_2<span class="sc">==</span>A_2)</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Store the last element of psi</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>psi_6 <span class="ot">&lt;-</span> <span class="fu">expression</span>( Y <span class="sc">*</span> C_d <span class="sc">*</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>          (  (<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>(delta_1 <span class="sc">+</span> delta_2 <span class="sc">*</span> log_S_1)))<span class="sc">^</span>d_1 <span class="sc">*</span> <span class="co"># numerator</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>             (<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>(phi_1 <span class="sc">+</span> phi_2 <span class="sc">*</span> log_S_2 <span class="sc">+</span> phi_3 <span class="sc">*</span> A_1)))<span class="sc">^</span>d_2  ) </span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>          </span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>      <span class="sc">/</span>   (  (<span class="dv">1</span><span class="sc">-</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>(delta_1 <span class="sc">+</span> delta_2 <span class="sc">*</span> log_S_1)))<span class="sc">^</span>(<span class="sc">-</span><span class="dv">1</span>))<span class="sc">^</span>(<span class="dv">1</span><span class="sc">-</span>d_1) <span class="sc">*</span> <span class="co"># denominator</span></span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>             (<span class="dv">1</span><span class="sc">-</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>(phi_1 <span class="sc">+</span> phi_2 <span class="sc">*</span> log_S_2 <span class="sc">+</span> phi_3 <span class="sc">*</span> A_1)))<span class="sc">^</span>(<span class="sc">-</span><span class="dv">1</span>))<span class="sc">^</span>(<span class="dv">1</span><span class="sc">-</span>d_2)  ) </span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span> V</span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<p>Let’s now build a list detailing the full function <span class="math inline">\(\psi(z,\theta)\)</span>.</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>psi <span class="ot">&lt;-</span> <span class="fu">list</span>(psi_1, psi_2, psi_3, psi_4, psi_5, psi_6)</span></code></pre></div>
+<p>Now, let’s compute <span class="math inline">\(\hat{\mathcal{V}}_{IPW}(\tilde{d})\)</span> and stack it in a list of all the estimated parameters <span class="math inline">\(\hat{\theta}=\Big(\hat{\delta}_1,\hat{\delta}_2,\hat{\phi}_1,\hat{\phi}_2,\hat{\phi}_3, \hat{\mathcal{V}}_{IPW}(\tilde{d})\Big)^T\)</span>.</p>
+<p>For simplicity in computing <span class="math inline">\(\hat{\mathcal{V}}_{IPW}(\tilde{d})\)</span>, we recommend to use a slightly modified version of <code>psi_6</code> as follows.</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Just delete &quot;- V&quot; from in the previous expression</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="co"># add _hat as appropriate</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>ipw_estimator <span class="ot">&lt;-</span> <span class="fu">expression</span>( Y <span class="sc">*</span> C_d <span class="sc">*</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>          (  (<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>(delta_1_hat <span class="sc">+</span> delta_2_hat <span class="sc">*</span> log_S_1)))<span class="sc">^</span>d_1 <span class="sc">*</span> <span class="co"># numerator</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>             (<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>(phi_1_hat <span class="sc">+</span> phi_2_hat <span class="sc">*</span> log_S_2 <span class="sc">+</span> phi_3_hat <span class="sc">*</span> A_1)))<span class="sc">^</span>d_2  ) </span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>          </span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>      <span class="sc">/</span>   (  (<span class="dv">1</span><span class="sc">-</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>(delta_1_hat <span class="sc">+</span> delta_2_hat <span class="sc">*</span> log_S_1)))<span class="sc">^</span>(<span class="sc">-</span><span class="dv">1</span>))<span class="sc">^</span>(<span class="dv">1</span><span class="sc">-</span>d_1) <span class="sc">*</span> <span class="co"># denominator</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>             (<span class="dv">1</span><span class="sc">-</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>(phi_1_hat <span class="sc">+</span> phi_2_hat <span class="sc">*</span> log_S_2 <span class="sc">+</span> phi_3_hat <span class="sc">*</span> A_1)))<span class="sc">^</span>(<span class="sc">-</span><span class="dv">1</span>))<span class="sc">^</span>(<span class="dv">1</span><span class="sc">-</span>d_2)  )  </span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute individual contribution and take the average</span></span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>V_hat <span class="ot">&lt;-</span> <span class="fu">with</span>(dat, <span class="fu">mean</span>(<span class="fu">eval</span>(ipw_estimator))) <span class="co"># Other ways to compute this quantity are OK too.</span></span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>thetas_hat <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">delta_1=</span>delta_1_hat,</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>                   <span class="at">delta_2=</span>delta_2_hat,</span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>                   <span class="at">phi_1=</span>phi_1_hat,</span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>                   <span class="at">phi_2=</span>phi_2_hat,</span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>                   <span class="at">phi_3=</span>phi_3_hat,</span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a>                   <span class="at">V=</span>V_hat)</span></code></pre></div>
+<p>Let’s pass the relevant arguments to <code>get_vcov</code> and check results for the standard errors.</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">get_vcov</span>(<span class="at">data=</span>dat, <span class="at">thetas=</span>thetas_hat, <span class="at">M=</span>psi)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>res<span class="sc">$</span>se</span></code></pre></div>
+<pre><code>##    delta_1    delta_2      phi_1      phi_2      phi_3          V 
+## 0.02836275 0.19963843 0.03921097 0.22778301 0.12032851 0.03641272</code></pre>
+Let’s see how the results compare with standard errors obtained from the bootstrap.
+<details>
+<summary>
+<em>click here to see the bootstrap procedure</em>
+</summary>
+<p><br></p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>boot_fun <span class="ot">&lt;-</span> <span class="cf">function</span>(d, <span class="at">i=</span><span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(d)) {</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  z<span class="ot">&lt;-</span>d[i,]</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  e_1 <span class="ot">&lt;-</span> <span class="fu">glm</span>(A_1<span class="sc">~</span><span class="fu">I</span>(<span class="fu">log</span>(S_1)), <span class="at">data=</span>z, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  e_2 <span class="ot">&lt;-</span> <span class="fu">glm</span>(A_2<span class="sc">~</span><span class="fu">I</span>(<span class="fu">log</span>(S_2)) <span class="sc">+</span> A_1 , <span class="at">data=</span>z, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>  delta_1_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(e_1)[<span class="dv">1</span>]</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>  delta_2_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(e_1)[<span class="dv">2</span>]</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>  phi_1_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(e_2)[<span class="dv">1</span>]</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>  phi_2_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(e_2)[<span class="dv">2</span>]</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>  phi_3_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(e_2)[<span class="dv">3</span>]</span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>  ipw_estimator <span class="ot">&lt;-</span> <span class="fu">expression</span>( z<span class="sc">$</span>Y <span class="sc">*</span> z<span class="sc">$</span>C_d <span class="sc">*</span></span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>            (  (<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>(delta_1_hat <span class="sc">+</span> delta_2_hat <span class="sc">*</span> z<span class="sc">$</span>log_S_1)))<span class="sc">^</span>z<span class="sc">$</span>d_1 <span class="sc">*</span> <span class="co"># numerator</span></span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>               (<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>(phi_1_hat <span class="sc">+</span> phi_2_hat <span class="sc">*</span> z<span class="sc">$</span>log_S_2 <span class="sc">+</span> phi_3_hat <span class="sc">*</span> z<span class="sc">$</span>A_1)))<span class="sc">^</span>z<span class="sc">$</span>d_2  ) </span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>        <span class="sc">/</span>   (  (<span class="dv">1</span><span class="sc">-</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>(delta_1_hat <span class="sc">+</span> delta_2_hat <span class="sc">*</span> z<span class="sc">$</span>log_S_1)))<span class="sc">^</span>(<span class="sc">-</span><span class="dv">1</span>))<span class="sc">^</span>(<span class="dv">1</span><span class="sc">-</span>z<span class="sc">$</span>d_1) <span class="sc">*</span> <span class="co"># denominator</span></span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>               (<span class="dv">1</span><span class="sc">-</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>(phi_1_hat <span class="sc">+</span> phi_2_hat <span class="sc">*</span> z<span class="sc">$</span>log_S_2 <span class="sc">+</span> phi_3_hat <span class="sc">*</span> z<span class="sc">$</span>A_1)))<span class="sc">^</span>(<span class="sc">-</span><span class="dv">1</span>))<span class="sc">^</span>(<span class="dv">1</span><span class="sc">-</span>z<span class="sc">$</span>d_2)  )  </span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>  V_hat <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">eval</span>(ipw_estimator))</span>
+<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>( <span class="fu">c</span>(delta_1_hat, delta_2_hat, phi_1_hat, phi_2_hat, phi_3_hat, V_hat) )</span>
+<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a>boot_start_time <span class="ot">&lt;-</span> <span class="fu">Sys.time</span>()</span>
+<span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a>res_boot <span class="ot">&lt;-</span> boot<span class="sc">::</span><span class="fu">boot</span>(dat, boot_fun, <span class="at">R=</span><span class="dv">999</span>)</span>
+<span id="cb35-25"><a href="#cb35-25" aria-hidden="true" tabindex="-1"></a>boot_end_time <span class="ot">&lt;-</span> <span class="fu">Sys.time</span>()</span>
+<span id="cb35-26"><a href="#cb35-26" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="st">&quot;Bootstrapping took&quot;</span>, <span class="fu">round</span>(<span class="fu">as.numeric</span>(boot_end_time <span class="sc">-</span> boot_start_time), <span class="dv">2</span>), <span class="st">&quot;seconds.&quot;</span>)</span></code></pre></div>
+<pre><code>## [1] &quot;Bootstrapping took 20.43 seconds.&quot;</code></pre>
+</details>
+<pre><code>## 
+## ORDINARY NONPARAMETRIC BOOTSTRAP
+## 
+## 
+## Call:
+## boot::boot(data = dat, statistic = boot_fun, R = 999)
+## 
+## 
+## Bootstrap Statistics :
+##        original        bias    std. error
+## t1* -0.10641382 -0.0002500751  0.02843059
+## t2*  0.65733524  0.0080253525  0.20518095
+## t3*  0.07486354  0.0005029474  0.03972660
+## t4*  1.22872312 -0.0066237516  0.23196144
+## t5*  3.12746280  0.0087706975  0.12208167
+## t6*  0.83983316  0.0021767814  0.03644645</code></pre>
+<p>This is pretty close to the results in <code>res$se</code> that we obtained 203.4 times faster with <code>Mestim</code>.</p>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<p>Boos, D. D. and Stefanski, L. (2013). <em>Essential Statistical Inference</em>. Springer, New York. <a href="https://doi.org/10.1007/978-1-4614-4818-1">https://doi.org/10.1007/978-1-4614-4818-1</a>.</p>
+<p>Tsiatis, A. A., Davidian, M., Holloway, S. T. &amp; Laber, E. B. (2019), <em>Dynamic Treatment Regimes: Statistical Methods for Precision Medicine</em>, CRC Press. <a href="https://doi.org/10.1201/9780429192692">https://doi.org/10.1201/9780429192692</a>.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
