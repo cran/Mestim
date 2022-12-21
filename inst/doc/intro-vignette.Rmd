@@ -7,12 +7,12 @@ author:
 date: "December 17, 2022"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction to geex}
+  %\VignetteIndexEntry{Introduction to Mestim}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-This vignette serves as a short introduction to computing the variance-covariance matrix of a multidimensional parameter using M-estimation and the empirical sandwich variance. You may want to check the latest version of this vignette on [GitHub](https://fcgrolleau.github.io/Mestim/vignette/vignette.html).
+This vignette serves as a short introduction to computing the variance-covariance matrix of a multidimensional parameter using M-estimation and the empirical sandwich variance.
 
 ## Baby review of M-estimation
 Denoting $F$ a probability distribution, a $p$-dimensional M-estimator of $\psi$-type $T$ solves the vector equation
@@ -275,15 +275,15 @@ head(dat)
 ```
 Given any treatment action regime $d=\{d_1,\ldots, d_T\}^T$, an estimator for $\mathbb{E}_{Z\sim d}(Y)$ is 
 \begin{equation}
-\hat{\mathcal{V}}_{IPW}(d)=n^{-1}\sum_{i=1}^nY_i\prod_{t=1}^T\frac{\mathbf{1}\big({d_t(S_{t,i})=A_{t,i}}\big)}{\hat{e}_t\Big(S_{t,i},A_{t-1,i},S_{t-1,i}, \ldots,S_{1,i}\Big)^{d_t(S_{t,i})}\bigg\{1-\hat{e}_t\Big(S_{t,i},A_{t-1,i},S_{t-1,i}, \ldots,S_{1,i}\Big)\bigg\}^{1-d_t(S_{t,i})} } \quad \quad (1)
+\hat{\mathcal{V}}_{IPW}(d)=n^{-1}\sum_{i=1}^nY_i\prod_{t=1}^T\frac{\mathbf{1}\big({d_t(H_{t,i})=A_{t,i}}\big)}{\hat{e}_t(H_{t,i})^{d_t(H_{t,i})}\big\{1-\hat{e}_t(H_{t,i})\big\}^{1-d_t(H_{t,i})} } \quad \quad (1)
 \end{equation}
 
-where we write the relevant generalization of the propensity score as $e_t\Big(S_{t},A_{t-1},S_{t-1}, \ldots,S_{1}\Big)=\mathbb{E}\Big(A_{t}|S_{t},A_{t-1},S_{t-1}, \ldots,S_{1}\Big).$ 
+where we use the history notation $H_t=(S_{t},A_{t-1},S_{t-1}, \ldots,S_{1})^T$ and write the relevant generalization of the propensity score as $e_t(H_t)=\mathbb{E}(A_{t}|H_t)$ for clarity. 
 
-In this example we consider the regime $\tilde{d}=\{\tilde{d}_1(S_1)=\mathbf{1}_{S_1>1},\tilde{d}_2(S_2)=\mathbf{1}_{S_2>1}\}$. The goal is to calculate standard errors for $\hat{\mathcal{V}}_{IPW}(\tilde{d})$.
-As $T=2$, we need specify models for $e_1(S_1)$ and $e_2(S_2,A_1,S_1)$. Let's specify the parametric regression models 
-$$e_1(S_1;\boldsymbol{\delta})=\text{expit}\big(\delta_1+\delta_2\log S_1)$$ 
-and $$e_2(S_2,A_1,S_1;\boldsymbol{\phi})=\text{expit}\big(\phi_1+\phi_2\log S_2 +\phi_3A_1).$$ We fit and store the estimated parameters as follows.
+In this example we consider the regime $\tilde{d}(Z)=\{\tilde{d}_1(H_1)=\mathbf{1}_{S_1>1},\tilde{d}_2(H_2)=\mathbf{1}_{S_2>1}\}^T$. The goal is to calculate standard errors for $\hat{\mathcal{V}}_{IPW}(\tilde{d})$.
+As $T=2$, we need specify models for $e_1(H_1)$ and $e_2(H_2)$. Let's specify the parametric regression models 
+$$e_1(H_1;\boldsymbol{\delta})=\text{expit}\big(\delta_1+\delta_2\log S_1)$$ 
+and $$e_2(H_2;\boldsymbol{\phi})=\text{expit}\big(\phi_1+\phi_2\log S_2 +\phi_3A_1).$$ We fit and store the estimated parameters as follows.
 ```{r, message=FALSE, warning=FALSE, results='hide'}
 e_1 <- glm(A_1~I(log(S_1)), data=dat, family = "binomial")
 delta_1_hat <- coef(e_1)[1]
@@ -317,8 +317,7 @@ psi_4 <- expression( ((1/(1+exp(-(phi_1 + phi_2 * log_S_2 + phi_3 * A_1)))) - A_
 psi_5 <- expression( ((1/(1+exp(-(phi_1 + phi_2 * log_S_2 + phi_3 * A_1)))) - A_2) * A_1)
 ```
 
-To obtain the last element of $\psi$, we need to do algebraic manipulations. Denoting $\mathcal{C}_{\tilde{d}, i}=\prod_{t=1}^2\mathbf{1}\big({\tilde{d}_t(S_{t,i})=A_{t,i}}\big)$ for simplicity, after substitution for $\hat{e}_1(S_1;\boldsymbol{\hat{\delta}})$ and $\hat{e}_2(S_2,A_1,S_1;\boldsymbol{\hat{\phi}})$, equation $(1)$ yields 
-
+To obtain the last element of $\psi$, we need to do algebraic manipulations. Denoting $\mathcal{C}_{\tilde{d}, i}=\prod_{t=1}^2\mathbf{1}\big({\tilde{d}_t(H_{t,i})=A_{t,i}}\big)$ for simplicity, after substitution for $\hat{e}_1(H_1;\boldsymbol{\hat{\delta}})$ and $\hat{e}_2(H_2;\boldsymbol{\hat{\phi}})$, equation $(1)$ yields 
 \begin{equation}
 \hat{\mathcal{V}}_{IPW}(\tilde{d})=\\
 n^{-1}\sum_{i=1}^nY_i\mathcal{C}_{\tilde{d}, i}

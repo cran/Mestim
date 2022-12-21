@@ -147,7 +147,7 @@ Clincal epidemiology — Hôpital Hôtel-Dieu<br><h4 class="date">December 17, 2
 
 
 
-<p>This vignette serves as a short introduction to computing the variance-covariance matrix of a multidimensional parameter using M-estimation and the empirical sandwich variance. You may want to check the latest version of this vignette on <a href="https://fcgrolleau.github.io/Mestim/vignette/vignette.html">GitHub</a>.</p>
+<p>This vignette serves as a short introduction to computing the variance-covariance matrix of a multidimensional parameter using M-estimation and the empirical sandwich variance.</p>
 <div id="baby-review-of-m-estimation" class="section level2">
 <h2>Baby review of M-estimation</h2>
 <p>Denoting <span class="math inline">\(F\)</span> a probability distribution, a <span class="math inline">\(p\)</span>-dimensional M-estimator of <span class="math inline">\(\psi\)</span>-type <span class="math inline">\(T\)</span> solves the vector equation <span class="math display">\[\int_\mathcal{Z}\psi\big(z, T(F)\big)dF(z)=\boldsymbol{0}.\]</span> In practice, this means that the estimator <span class="math inline">\(T\)</span> has an <em>unbiased estimating function</em> <span class="math inline">\(\psi(z,\theta)=\{\psi_1(z,\theta), \ldots, \psi_p(z,\theta)\}^T\)</span> with solution <span class="math inline">\(\hat{\theta}~(p\times 1)\)</span> solving in <span class="math inline">\(\theta\)</span> the <span class="math inline">\((p\times 1)\)</span> set of “stacked” estimating equations given by <span class="math display">\[ \sum_{i=1}^{n}\psi(Z_i,\theta)=\boldsymbol{0}.\]</span> For a <span class="math inline">\(\psi\)</span>-type M-estimator <span class="math inline">\(T\)</span> with estimate <span class="math inline">\(\hat{\theta}\)</span>, under suitable regularity conditions for <span class="math inline">\(\psi\)</span>, the central limit theorem and Slutsky’s theorem yield <span class="math display">\[\sqrt{n}\big(\hat{\theta}-T(F)\big)\xrightarrow{\mathcal{D}}\mathcal{N}\big(0, \Sigma)\]</span> where <span class="math display">\[\Sigma=\Bigg[\mathbb{E}\bigg\{\frac{\partial \psi\big(Z,T(F)\big) }{\partial\theta^T}\bigg\}\Bigg]^{-1}\mathbb{E}\Big\{ \psi\big(Z,T(F)\big) \psi^T\big(Z,T(F)\big)\Big\}\Bigg[\mathbb{E}\bigg\{\frac{\partial \psi\big(Z,T(F)\big) }{\partial\theta^T}\bigg\}\Bigg]^{-T}.\]</span> This implies that the <span class="math inline">\(p\)</span>-dimensional M-estimator <span class="math inline">\(\hat{\theta}\)</span> is an asymptotically normal, <span class="math inline">\(\sqrt{n}\)</span>-consistent, estimator for <span class="math inline">\(T(F)\)</span>. See <a href="http://ndl.ethernet.edu.et/bitstream/123456789/61932/1/265.pdf">Boos and Stefanski (2013)</a> for a full introduction to M-estimation.</p>
@@ -305,14 +305,14 @@ Let’s see how the results compare with standard errors obtained from the boots
 <span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>res_boot <span class="ot">&lt;-</span> boot<span class="sc">::</span><span class="fu">boot</span>(dat, boot_fun, <span class="at">R=</span><span class="dv">999</span>)</span>
 <span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>boot_end_time <span class="ot">&lt;-</span> <span class="fu">Sys.time</span>()</span>
 <span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="st">&quot;Bootstrapping took&quot;</span>, <span class="fu">round</span>(<span class="fu">as.numeric</span>(boot_end_time <span class="sc">-</span> boot_start_time), <span class="dv">2</span>), <span class="st">&quot;seconds.&quot;</span>)</span></code></pre></div>
-<pre><code>## [1] &quot;Bootstrapping took 3.91 seconds.&quot;</code></pre>
+<pre><code>## [1] &quot;Bootstrapping took 3.33 seconds.&quot;</code></pre>
 </details>
 <pre><code>##              [,1]        [,2]       [,3]         [,4]
 ## [1,]  0.166959339 -0.00255421 -0.1636470 -0.002452947
 ## [2,] -0.002554210  0.24003558 -0.1433816  0.240057058
 ## [3,] -0.163647006 -0.14338163  0.4128908 -0.143436074
 ## [4,] -0.002452947  0.24005706 -0.1434361  0.240449603</code></pre>
-<p>This is pretty close to the results in <code>res$vcov</code> that we obtained 52.4 times faster with <code>Mestim</code>.</p>
+<p>This is pretty close to the results in <code>res$vcov</code> that we obtained 52.1 times faster with <code>Mestim</code>.</p>
 </div>
 <div id="example-3-value-estimation-for-dynamic-treatment-regime" class="section level2">
 <h2>Example 3: Value estimation for dynamic treatment regime</h2>
@@ -354,10 +354,10 @@ Let’s see how the results compare with standard errors obtained from the boots
 ## 5 0.9743708   1 0.9324451   1 1.189594
 ## 6 1.0222173   1 0.9174528   1 1.195341</code></pre>
 <p>Given any treatment action regime <span class="math inline">\(d=\{d_1,\ldots, d_T\}^T\)</span>, an estimator for <span class="math inline">\(\mathbb{E}_{Z\sim d}(Y)\)</span> is <span class="math display">\[\begin{equation}
-\hat{\mathcal{V}}_{IPW}(d)=n^{-1}\sum_{i=1}^nY_i\prod_{t=1}^T\frac{\mathbf{1}\big({d_t(S_{t,i})=A_{t,i}}\big)}{\hat{e}_t\Big(S_{t,i},A_{t-1,i},S_{t-1,i}, \ldots,S_{1,i}\Big)^{d_t(S_{t,i})}\bigg\{1-\hat{e}_t\Big(S_{t,i},A_{t-1,i},S_{t-1,i}, \ldots,S_{1,i}\Big)\bigg\}^{1-d_t(S_{t,i})} } \quad \quad (1)
+\hat{\mathcal{V}}_{IPW}(d)=n^{-1}\sum_{i=1}^nY_i\prod_{t=1}^T\frac{\mathbf{1}\big({d_t(H_{t,i})=A_{t,i}}\big)}{\hat{e}_t(H_{t,i})^{d_t(H_{t,i})}\big\{1-\hat{e}_t(H_{t,i})\big\}^{1-d_t(H_{t,i})} } \quad \quad (1)
 \end{equation}\]</span></p>
-<p>where we write the relevant generalization of the propensity score as <span class="math inline">\(e_t\Big(S_{t},A_{t-1},S_{t-1}, \ldots,S_{1}\Big)=\mathbb{E}\Big(A_{t}|S_{t},A_{t-1},S_{t-1}, \ldots,S_{1}\Big).\)</span></p>
-<p>In this example we consider the regime <span class="math inline">\(\tilde{d}=\{\tilde{d}_1(S_1)=\mathbf{1}_{S_1&gt;1},\tilde{d}_2(S_2)=\mathbf{1}_{S_2&gt;1}\}\)</span>. The goal is to calculate standard errors for <span class="math inline">\(\hat{\mathcal{V}}_{IPW}(\tilde{d})\)</span>. As <span class="math inline">\(T=2\)</span>, we need specify models for <span class="math inline">\(e_1(S_1)\)</span> and <span class="math inline">\(e_2(S_2,A_1,S_1)\)</span>. Let’s specify the parametric regression models <span class="math display">\[e_1(S_1;\boldsymbol{\delta})=\text{expit}\big(\delta_1+\delta_2\log S_1)\]</span> and <span class="math display">\[e_2(S_2,A_1,S_1;\boldsymbol{\phi})=\text{expit}\big(\phi_1+\phi_2\log S_2 +\phi_3A_1).\]</span> We fit and store the estimated parameters as follows.</p>
+<p>where we use the history notation <span class="math inline">\(H_t=(S_{t},A_{t-1},S_{t-1}, \ldots,S_{1})^T\)</span> and write the relevant generalization of the propensity score as <span class="math inline">\(e_t(H_t)=\mathbb{E}(A_{t}|H_t)\)</span> for clarity.</p>
+<p>In this example we consider the regime <span class="math inline">\(\tilde{d}(Z)=\{\tilde{d}_1(H_1)=\mathbf{1}_{S_1&gt;1},\tilde{d}_2(H_2)=\mathbf{1}_{S_2&gt;1}\}^T\)</span>. The goal is to calculate standard errors for <span class="math inline">\(\hat{\mathcal{V}}_{IPW}(\tilde{d})\)</span>. As <span class="math inline">\(T=2\)</span>, we need specify models for <span class="math inline">\(e_1(H_1)\)</span> and <span class="math inline">\(e_2(H_2)\)</span>. Let’s specify the parametric regression models <span class="math display">\[e_1(H_1;\boldsymbol{\delta})=\text{expit}\big(\delta_1+\delta_2\log S_1)\]</span> and <span class="math display">\[e_2(H_2;\boldsymbol{\phi})=\text{expit}\big(\phi_1+\phi_2\log S_2 +\phi_3A_1).\]</span> We fit and store the estimated parameters as follows.</p>
 <div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>e_1 <span class="ot">&lt;-</span> <span class="fu">glm</span>(A_1<span class="sc">~</span><span class="fu">I</span>(<span class="fu">log</span>(S_1)), <span class="at">data=</span>dat, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>delta_1_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(e_1)[<span class="dv">1</span>]</span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>delta_2_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(e_1)[<span class="dv">2</span>]</span>
@@ -377,8 +377,7 @@ Let’s see how the results compare with standard errors obtained from the boots
 <span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>psi_3 <span class="ot">&lt;-</span> <span class="fu">expression</span>( ((<span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>(phi_1 <span class="sc">+</span> phi_2 <span class="sc">*</span> log_S_2 <span class="sc">+</span> phi_3 <span class="sc">*</span> A_1)))) <span class="sc">-</span> A_2) <span class="sc">*</span> <span class="dv">1</span> )</span>
 <span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>psi_4 <span class="ot">&lt;-</span> <span class="fu">expression</span>( ((<span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>(phi_1 <span class="sc">+</span> phi_2 <span class="sc">*</span> log_S_2 <span class="sc">+</span> phi_3 <span class="sc">*</span> A_1)))) <span class="sc">-</span> A_2) <span class="sc">*</span> log_S_2)</span>
 <span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>psi_5 <span class="ot">&lt;-</span> <span class="fu">expression</span>( ((<span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>(phi_1 <span class="sc">+</span> phi_2 <span class="sc">*</span> log_S_2 <span class="sc">+</span> phi_3 <span class="sc">*</span> A_1)))) <span class="sc">-</span> A_2) <span class="sc">*</span> A_1)</span></code></pre></div>
-<p>To obtain the last element of <span class="math inline">\(\psi\)</span>, we need to do algebraic manipulations. Denoting <span class="math inline">\(\mathcal{C}_{\tilde{d}, i}=\prod_{t=1}^2\mathbf{1}\big({\tilde{d}_t(S_{t,i})=A_{t,i}}\big)\)</span> for simplicity, after substitution for <span class="math inline">\(\hat{e}_1(S_1;\boldsymbol{\hat{\delta}})\)</span> and <span class="math inline">\(\hat{e}_2(S_2,A_1,S_1;\boldsymbol{\hat{\phi}})\)</span>, equation <span class="math inline">\((1)\)</span> yields</p>
-<p><span class="math display">\[\begin{equation}
+<p>To obtain the last element of <span class="math inline">\(\psi\)</span>, we need to do algebraic manipulations. Denoting <span class="math inline">\(\mathcal{C}_{\tilde{d}, i}=\prod_{t=1}^2\mathbf{1}\big({\tilde{d}_t(H_{t,i})=A_{t,i}}\big)\)</span> for simplicity, after substitution for <span class="math inline">\(\hat{e}_1(H_1;\boldsymbol{\hat{\delta}})\)</span> and <span class="math inline">\(\hat{e}_2(H_2;\boldsymbol{\hat{\phi}})\)</span>, equation <span class="math inline">\((1)\)</span> yields <span class="math display">\[\begin{equation}
 \hat{\mathcal{V}}_{IPW}(\tilde{d})=\\
 n^{-1}\sum_{i=1}^nY_i\mathcal{C}_{\tilde{d}, i}
 \frac{\Big[1+\exp\big\{-(\delta_1+\delta_2 \log S_{1,i})\big\}\Big]^{\tilde{d}_1(S_{1,i})} \Big[1+\exp\big\{-(\phi_1+\phi_2 \log S_{2,i}+\phi_3 A_{1,i})\big\}\Big]^{\tilde{d}_2(S_{2,i})}}
@@ -466,7 +465,7 @@ Let’s see how the results compare with standard errors obtained from the boots
 <span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a>res_boot <span class="ot">&lt;-</span> boot<span class="sc">::</span><span class="fu">boot</span>(dat, boot_fun, <span class="at">R=</span><span class="dv">999</span>)</span>
 <span id="cb35-25"><a href="#cb35-25" aria-hidden="true" tabindex="-1"></a>boot_end_time <span class="ot">&lt;-</span> <span class="fu">Sys.time</span>()</span>
 <span id="cb35-26"><a href="#cb35-26" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="st">&quot;Bootstrapping took&quot;</span>, <span class="fu">round</span>(<span class="fu">as.numeric</span>(boot_end_time <span class="sc">-</span> boot_start_time), <span class="dv">2</span>), <span class="st">&quot;seconds.&quot;</span>)</span></code></pre></div>
-<pre><code>## [1] &quot;Bootstrapping took 20.43 seconds.&quot;</code></pre>
+<pre><code>## [1] &quot;Bootstrapping took 18.06 seconds.&quot;</code></pre>
 </details>
 <pre><code>## 
 ## ORDINARY NONPARAMETRIC BOOTSTRAP
@@ -484,7 +483,7 @@ Let’s see how the results compare with standard errors obtained from the boots
 ## t4*  1.22872312 -0.0066237516  0.23196144
 ## t5*  3.12746280  0.0087706975  0.12208167
 ## t6*  0.83983316  0.0021767814  0.03644645</code></pre>
-<p>This is pretty close to the results in <code>res$se</code> that we obtained 203.4 times faster with <code>Mestim</code>.</p>
+<p>This is pretty close to the results in <code>res$se</code> that we obtained 206.7 times faster with <code>Mestim</code>.</p>
 </div>
 <div id="references" class="section level2">
 <h2>References</h2>

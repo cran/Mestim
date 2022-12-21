@@ -1,3 +1,8 @@
+# Mestim 0.2.1
+
+* Fix VignetteIndexEntry
+* Clarifications on the vignette
+
 # Mestim 0.2.0
 
 * Fix stacking errors in get_vcov
